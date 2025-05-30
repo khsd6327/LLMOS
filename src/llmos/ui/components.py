@@ -20,63 +20,50 @@ class EnhancedUI:
     """향상된 UI 컴포넌트 모음"""
 
     @staticmethod
-    def render_copy_button(text_to_copy: str, button_key: str, help_text: str = "복사"):
-        """복사 버튼 렌더링"""
-        if st.button("📋", key=f"copy_btn_{button_key}", help=help_text):
-            st.code(text_to_copy, language=None)
-            st.success("위 텍스트를 선택하여 복사하세요 (Ctrl+A, Ctrl+C).", icon="📋")
-
-    @staticmethod
-    def render_edit_button(button_key: str):
-        """편집 버튼 렌더링"""
-        return st.button("✏️", key=f"edit_btn_{button_key}", help="수정")
-
-    @staticmethod
-    def render_retry_button(button_key: str):
-        """재시도 버튼 렌더링"""
-        return st.button("🔄", key=f"retry_btn_{button_key}", help="다시 시도")
-
-    @staticmethod
-    def render_usage_stats(usage_tracker: UsageTracker):
+    def render_usage_stats(usage_tracker):
         """사용량 통계 렌더링 (세션 + 오늘 + 전체)"""
         st.markdown("### 📊 사용량 통계")
         
-        session_stats = usage_tracker.get_session_usage()
-        today_stats = usage_tracker.get_today_usage_from_summary()
-        total_stats = usage_tracker.get_total_usage_from_history()
+        try:
+            session_stats = usage_tracker.get_session_usage()
+            today_stats = usage_tracker.get_today_usage_from_summary()
+            total_stats = usage_tracker.get_total_usage_from_history()
 
-        # 세션 사용량 (현재 앱 실행 이후)
-        with st.expander("⚡ 현재 세션", expanded=True):
-            col1, col2, col3 = st.columns(3)
-            col1.metric("요청", f"{session_stats['total_requests']:,}")
-            col2.metric("토큰", f"{session_stats['total_tokens']:,}")
-            
-            session_cost_str = f"${session_stats['total_cost']:.4f}" if session_stats['total_cost'] > 0.00001 else "$0.00"
-            col3.metric("비용 (USD)", session_cost_str)
-            
-            # 세션 지속 시간 표시
-            session_duration = session_stats.get('session_duration_minutes', 0)
-            if session_duration > 0:
-                st.caption(f"세션 시간: {session_duration:.1f}분")
+            # 세션 사용량 (현재 앱 실행 이후)
+            with st.expander("⚡ 현재 세션", expanded=True):
+                col1, col2, col3 = st.columns(3)
+                col1.metric("요청", f"{session_stats['total_requests']:,}")
+                col2.metric("토큰", f"{session_stats['total_tokens']:,}")
+                
+                session_cost_str = f"${session_stats['total_cost']:.4f}" if session_stats['total_cost'] > 0.00001 else "$0.00"
+                col3.metric("비용 (USD)", session_cost_str)
+                
+                # 세션 지속 시간 표시
+                session_duration = session_stats.get('session_duration_minutes', 0)
+                if session_duration > 0:
+                    st.caption(f"세션 시간: {session_duration:.1f}분")
 
-        # 오늘 사용량
-        with st.expander("📅 오늘 사용량", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            col1.metric("요청", f"{today_stats['total_requests']:,}")
-            col2.metric("토큰", f"{today_stats['total_tokens']:,}")
-            
-            cost_str = f"${today_stats['total_cost']:.4f}" if today_stats['total_cost'] > 0.00001 else "$0.00"
-            col3.metric("비용 (USD)", cost_str)
+            # 오늘 사용량
+            with st.expander("📅 오늘 사용량", expanded=False):
+                col1, col2, col3 = st.columns(3)
+                col1.metric("요청", f"{today_stats['total_requests']:,}")
+                col2.metric("토큰", f"{today_stats['total_tokens']:,}")
+                
+                cost_str = f"${today_stats['total_cost']:.4f}" if today_stats['total_cost'] > 0.00001 else "$0.00"
+                col3.metric("비용 (USD)", cost_str)
 
-        # 전체 사용량
-        with st.expander("📈 전체 사용량 (기록 기반)", expanded=False):
-            col1, col2, col3 = st.columns(3)
-            col1.metric("총 요청", f"{total_stats['total_requests']:,}")
-            col2.metric("총 토큰", f"{total_stats['total_tokens']:,}")
-            
-            total_cost_str = f"${total_stats['total_cost']:.4f}" if total_stats['total_cost'] > 0.00001 else "$0.00"
-            col3.metric("총 비용 (USD)", total_cost_str)
-            
+            # 전체 사용량
+            with st.expander("📈 전체 사용량 (기록 기반)", expanded=False):
+                col1, col2, col3 = st.columns(3)
+                col1.metric("총 요청", f"{total_stats['total_requests']:,}")
+                col2.metric("총 토큰", f"{total_stats['total_tokens']:,}")
+                
+                total_cost_str = f"${total_stats['total_cost']:.4f}" if total_stats['total_cost'] > 0.00001 else "$0.00"
+                col3.metric("총 비용 (USD)", total_cost_str)
+                
+        except Exception as e:
+            st.error(f"사용량 통계 로드 중 오류: {e}")
+            st.info("사용량 데이터를 불러올 수 없습니다.")                    
     @staticmethod
     def render_usage_trends(usage_tracker: UsageTracker, days: int = 7):
         """사용량 트렌드 차트"""

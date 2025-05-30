@@ -18,19 +18,29 @@ class UsageTracker:
     """토큰 사용량 추적 관리자"""
 
     def __init__(self, storage_path: str):
-            self.storage_path = Path(storage_path)
-            self.storage_path.mkdir(parents=True, exist_ok=True)
-            self.usage_file = self.storage_path / "usage_history.jsonl"
-            self.daily_summary_file = self.storage_path / "daily_summary.json"
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.usage_file = self.storage_path / "usage_history.jsonl"
+        self.daily_summary_file = self.storage_path / "daily_summary.json"
+        
+        # 🔧 세션별 사용량 추적 - Streamlit session_state 활용
+        import streamlit as st
+        
+        # session_state에 세션 사용량이 없으면 초기화
+        if "usage_session_start_time" not in st.session_state:
+            st.session_state.usage_session_start_time = datetime.now()
             
-            # 세션별 사용량 추적
-            self.session_start_time = datetime.now()
-            self.session_usage = {
+        if "usage_session_data" not in st.session_state:
+            st.session_state.usage_session_data = {
                 "total_tokens": 0,
                 "total_cost": 0.0,
                 "requests": 0,
                 "by_model": {}
             }
+        
+        # 기존 속성들을 session_state 참조로 변경
+        self.session_start_time = st.session_state.usage_session_start_time
+        self.session_usage = st.session_state.usage_session_data
             
     def _load_usage_history(self) -> List[TokenUsage]:
         """사용량 히스토리 로드 (안전장치 포함)"""
@@ -377,14 +387,19 @@ class UsageTracker:
         }
         
     def _update_session_usage(self, usage: TokenUsage):
-        """세션 사용량 업데이트"""
-        self.session_usage["total_tokens"] += usage.total_tokens
-        self.session_usage["total_cost"] = round(self.session_usage["total_cost"] + usage.cost_usd, 6)
-        self.session_usage["requests"] += 1
+        """세션 사용량 업데이트 (session_state 사용)"""
+        import streamlit as st
+        
+        # session_state에서 직접 업데이트
+        st.session_state.usage_session_data["total_tokens"] += usage.total_tokens
+        st.session_state.usage_session_data["total_cost"] = round(
+            st.session_state.usage_session_data["total_cost"] + usage.cost_usd, 6
+        )
+        st.session_state.usage_session_data["requests"] += 1
         
         # 모델별 통계
         model_key = f"{usage.provider}_{usage.model_name}"
-        model_stats = self.session_usage["by_model"].setdefault(model_key, {
+        model_stats = st.session_state.usage_session_data["by_model"].setdefault(model_key, {
             "tokens": 0,
             "cost": 0.0,
             "requests": 0
@@ -393,26 +408,42 @@ class UsageTracker:
         model_stats["tokens"] += usage.total_tokens
         model_stats["cost"] = round(model_stats["cost"] + usage.cost_usd, 6)
         model_stats["requests"] += 1
+        
+        # 로컬 참조도 업데이트
+        self.session_usage = st.session_state.usage_session_data
 
     def get_session_usage(self) -> Dict[str, Any]:
-        """현재 세션 사용량 반환"""
-        session_duration = datetime.now() - self.session_start_time
+        """현재 세션 사용량 반환 (session_state 사용)"""
+        import streamlit as st
+        
+        # session_state에서 최신 데이터 가져오기
+        session_start = st.session_state.usage_session_start_time
+        session_data = st.session_state.usage_session_data
+        
+        session_duration = datetime.now() - session_start
         
         return {
-            "session_start": self.session_start_time.isoformat(),
+            "session_start": session_start.isoformat(),
             "session_duration_minutes": round(session_duration.total_seconds() / 60, 2),
-            "total_tokens": self.session_usage["total_tokens"],
-            "total_cost": round(self.session_usage["total_cost"], 6),
-            "total_requests": self.session_usage["requests"],
-            "by_model": self.session_usage["by_model"]
+            "total_tokens": session_data["total_tokens"],
+            "total_cost": round(session_data["total_cost"], 6),
+            "total_requests": session_data["requests"],
+            "by_model": session_data["by_model"]
         }
 
     def reset_session_usage(self):
-        """세션 사용량 리셋 (새 세션 시작시 사용)"""
-        self.session_start_time = datetime.now()
-        self.session_usage = {
+        """세션 사용량 리셋 (새 세션 시작시 사용) - session_state 사용"""
+        import streamlit as st
+        
+        # session_state 초기화
+        st.session_state.usage_session_start_time = datetime.now()
+        st.session_state.usage_session_data = {
             "total_tokens": 0,
             "total_cost": 0.0,
             "requests": 0,
             "by_model": {}
         }
+        
+        # 로컬 참조도 업데이트
+        self.session_start_time = st.session_state.usage_session_start_time
+        self.session_usage = st.session_state.usage_session_data
