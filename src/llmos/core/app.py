@@ -466,14 +466,3 @@ def create_app() -> EnhancedLLMOSApp:
     return EnhancedLLMOSApp()
 
 
-def run_app():
-    """애플리케이션 실행 (스크립트용)"""
-    app = create_app()
-    
-    try:
-        app.run()
-    except KeyboardInterrupt:
-        logger.info("Application interrupted by user")
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}", exc_info=True)
-        st.error(f"예상치 못한 오류가 발생했습니다: {e}")
