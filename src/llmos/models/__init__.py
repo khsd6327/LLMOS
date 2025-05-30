@@ -10,18 +10,16 @@ from .model_registry import ModelRegistry
 __all__ = [
     # Enums
     "ModelProvider",
-    "ArtifactType", 
+    "ArtifactType",
     "MessageRole",
     "UIPage",
     "LogLevel",
-    
     # Data Models
     "ModelConfig",
     "TokenUsage",
     "Artifact",
     "ChatSession",
     "AppState",
-    
     # Registry
-    "ModelRegistry"
+    "ModelRegistry",
 ]

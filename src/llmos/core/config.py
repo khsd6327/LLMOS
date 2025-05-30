@@ -49,8 +49,8 @@ TOKEN_ESTIMATION_BUFFER = 1.1  # 10% 여유분
 MAX_CONTEXT_TOKENS = 128000
 
 # 로깅 설정
-LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 # UI 스타일 관련
 SIDEBAR_WIDTH = 300

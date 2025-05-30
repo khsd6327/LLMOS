@@ -8,6 +8,7 @@ from enum import Enum
 
 class ModelProvider(Enum):
     """AI 모델 제공업체 열거형"""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
@@ -15,6 +16,7 @@ class ModelProvider(Enum):
 
 class ArtifactType(Enum):
     """아티팩트 타입 열거형"""
+
     TEXT = "text"
     CODE = "code"
     MARKDOWN = "markdown"
@@ -27,6 +29,7 @@ class ArtifactType(Enum):
 
 class MessageRole(Enum):
     """메시지 역할 열거형"""
+
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
@@ -34,6 +37,7 @@ class MessageRole(Enum):
 
 class UIPage(Enum):
     """UI 페이지 타입 열거형"""
+
     CHAT = "chat"
     SETTINGS = "settings"
     ARTIFACTS = "artifacts"
@@ -43,6 +47,7 @@ class UIPage(Enum):
 
 class LogLevel(Enum):
     """로그 레벨 열거형"""
+
     DEBUG = "DEBUG"
     INFO = "INFO"
     WARNING = "WARNING"

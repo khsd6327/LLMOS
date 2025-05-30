@@ -8,9 +8,4 @@ from .settings import SettingsPage
 from .artifacts import ArtifactsPage
 from .debug import DebugPage
 
-__all__ = [
-    "ChatPage",
-    "SettingsPage",
-    "ArtifactsPage",
-    "DebugPage"
-]
+__all__ = ["ChatPage", "SettingsPage", "ArtifactsPage", "DebugPage"]

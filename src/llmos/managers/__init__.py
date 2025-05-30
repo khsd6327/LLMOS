@@ -12,8 +12,8 @@ from .model_manager import ModelManager, EnhancedModelManager
 __all__ = [
     "SettingsManager",
     "ChatSessionManager",
-    "ArtifactManager", 
+    "ArtifactManager",
     "UsageTracker",
     "ModelManager",
-    "EnhancedModelManager"
+    "EnhancedModelManager",
 ]

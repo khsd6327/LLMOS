@@ -43,18 +43,24 @@ class ModelManager:
             except Exception as e:
                 logger.error(f"Failed to initialize OpenAI interface: {e}")
         else:
-            logger.info("OpenAI API key not found/empty. OpenAI interface not initialized.")
+            logger.info(
+                "OpenAI API key not found/empty. OpenAI interface not initialized."
+            )
 
         # Anthropic 인터페이스
         anthropic_key = api_keys.get(ModelProvider.ANTHROPIC.value)
         if anthropic_key:
             try:
-                self.interfaces[ModelProvider.ANTHROPIC] = AnthropicInterface(anthropic_key)
+                self.interfaces[ModelProvider.ANTHROPIC] = AnthropicInterface(
+                    anthropic_key
+                )
                 logger.info("Anthropic interface initialized successfully.")
             except Exception as e:
                 logger.error(f"Failed to initialize Anthropic interface: {e}")
         else:
-            logger.info("Anthropic API key not found/empty. Anthropic interface not initialized.")
+            logger.info(
+                "Anthropic API key not found/empty. Anthropic interface not initialized."
+            )
 
         # Google 인터페이스
         google_key = api_keys.get(ModelProvider.GOOGLE.value)
@@ -65,7 +71,9 @@ class ModelManager:
             except Exception as e:
                 logger.error(f"Failed to initialize Google interface: {e}")
         else:
-            logger.info("Google API key not found/empty. Google interface not initialized.")
+            logger.info(
+                "Google API key not found/empty. Google interface not initialized."
+            )
 
     def get_available_providers(self) -> List[ModelProvider]:
         """사용 가능한 제공업체 목록"""
@@ -93,123 +101,166 @@ class EnhancedModelManager(ModelManager):
         self.usage_tracker = usage_tracker
 
     def _get_active_config(
-        self,
-        provider_display_name: Optional[str],
-        model_id_key: Optional[str]
+        self, provider_display_name: Optional[str], model_id_key: Optional[str]
     ) -> Tuple[ModelProvider, ModelConfig, LLMInterface]:
         """활성 모델 설정 가져오기"""
         # Provider 이름 정규화 (enum 형태를 display name으로 변환)
         if provider_display_name:
             provider_mapping = {
                 "OPENAI": "OpenAI",
-                "GOOGLE": "Google", 
-                "ANTHROPIC": "Anthropic"
+                "GOOGLE": "Google",
+                "ANTHROPIC": "Anthropic",
             }
             provider_display_name = provider_mapping.get(
-                provider_display_name.upper(), 
-                provider_display_name
+                provider_display_name.upper(), provider_display_name
             )
         # === 디버그 정보 출력 ===
         logger.info("=== DEBUG _get_active_config ===")
         logger.info(f"Input - provider_display_name: {provider_display_name}")
         logger.info(f"Input - model_id_key: {model_id_key}")
-        logger.info(f"Settings - ui.selected_provider: {self.settings.get('ui.selected_provider')}")
-        logger.info(f"Settings - all default models: {self.settings.get_all_default_models()}")
+        logger.info(
+            f"Settings - ui.selected_provider: {self.settings.get('ui.selected_provider')}"
+        )
+        logger.info(
+            f"Settings - all default models: {self.settings.get_all_default_models()}"
+        )
         logger.info("================================")
-        
-        resolved_provider_display_name = provider_display_name or self.settings.get("ui.selected_provider")
-        
+
+        resolved_provider_display_name = provider_display_name or self.settings.get(
+            "ui.selected_provider"
+        )
+
         # 제공업체별 기본 모델 선택 (새로운 방식)
         if model_id_key:
             resolved_model_id_key = model_id_key
         else:
             # 제공업체별 기본 모델 가져오기
             if resolved_provider_display_name:
-                resolved_model_id_key = self.settings.get_default_model_for_provider(resolved_provider_display_name)
+                resolved_model_id_key = self.settings.get_default_model_for_provider(
+                    resolved_provider_display_name
+                )
             else:
                 resolved_model_id_key = None
-            
+
             # 만약 제공업체별 기본 모델이 없으면 첫 번째 모델 사용
             if not resolved_model_id_key and resolved_provider_display_name:
-                available_models = ModelRegistry.get_models_for_provider(resolved_provider_display_name)
+                available_models = ModelRegistry.get_models_for_provider(
+                    resolved_provider_display_name
+                )
                 if available_models:
                     resolved_model_id_key = list(available_models.keys())[0]
                     # 자동 선택된 모델을 설정에 저장
-                    self.settings.set_default_model_for_provider(resolved_provider_display_name, resolved_model_id_key)
-                    logger.info(f"Auto-selected default model: {resolved_provider_display_name}/{resolved_model_id_key}")
-        
+                    self.settings.set_default_model_for_provider(
+                        resolved_provider_display_name, resolved_model_id_key
+                    )
+                    logger.info(
+                        f"Auto-selected default model: {resolved_provider_display_name}/{resolved_model_id_key}"
+                    )
+
         # 둘 다 없으면 첫 번째 사용 가능한 제공업체와 모델 사용
         if not resolved_provider_display_name or not resolved_model_id_key:
             logger.warning("Missing provider or model, attempting fallback...")
             available_providers = self.get_available_providers()
             if available_providers:
                 first_provider_enum = available_providers[0]
-                
+
                 # Enum에서 올바른 display name으로 변환
                 provider_mapping = {
                     "OPENAI": "OpenAI",
-                    "GOOGLE": "Google", 
-                    "ANTHROPIC": "Anthropic"
+                    "GOOGLE": "Google",
+                    "ANTHROPIC": "Anthropic",
                 }
                 resolved_provider_display_name = provider_mapping.get(
-                    first_provider_enum.name, 
-                    first_provider_enum.name.capitalize()
-                )                
+                    first_provider_enum.name, first_provider_enum.name.capitalize()
+                )
                 # 해당 제공업체의 기본 모델 가져오기
-                resolved_model_id_key = self.settings.get_default_model_for_provider(resolved_provider_display_name)
-                
+                resolved_model_id_key = self.settings.get_default_model_for_provider(
+                    resolved_provider_display_name
+                )
+
                 # 기본 모델이 없으면 첫 번째 모델 사용
                 if not resolved_model_id_key:
-                    available_models = ModelRegistry.get_models_for_provider(resolved_provider_display_name)
+                    available_models = ModelRegistry.get_models_for_provider(
+                        resolved_provider_display_name
+                    )
                     if available_models:
                         resolved_model_id_key = list(available_models.keys())[0]
                         # 자동 선택된 값을 설정에 저장
-                        self.settings.set_default_model_for_provider(resolved_provider_display_name, resolved_model_id_key)
-                
+                        self.settings.set_default_model_for_provider(
+                            resolved_provider_display_name, resolved_model_id_key
+                        )
+
                 # UI 설정도 업데이트
-                self.settings.set("ui.selected_provider", resolved_provider_display_name)
-                logger.info(f"Fallback selected: {resolved_provider_display_name}/{resolved_model_id_key}")
-        
-        logger.info(f"Final resolved - provider: {resolved_provider_display_name}, model: {resolved_model_id_key}")
+                self.settings.set(
+                    "ui.selected_provider", resolved_provider_display_name
+                )
+                logger.info(
+                    f"Fallback selected: {resolved_provider_display_name}/{resolved_model_id_key}"
+                )
+
+        logger.info(
+            f"Final resolved - provider: {resolved_provider_display_name}, model: {resolved_model_id_key}"
+        )
 
         if not resolved_provider_display_name or not resolved_model_id_key:
-            logger.error(f"Unable to resolve configuration - provider: {resolved_provider_display_name}, model: {resolved_model_id_key}")
-            raise ValueError("AI Provider or Model not selected/configured in settings.")
+            logger.error(
+                f"Unable to resolve configuration - provider: {resolved_provider_display_name}, model: {resolved_model_id_key}"
+            )
+            raise ValueError(
+                "AI Provider or Model not selected/configured in settings."
+            )
 
-        config = ModelRegistry.get_model_config(resolved_provider_display_name, resolved_model_id_key)
+        config = ModelRegistry.get_model_config(
+            resolved_provider_display_name, resolved_model_id_key
+        )
         if not config:
-            raise ValueError(f"Model configuration not found for: {resolved_provider_display_name}/{resolved_model_id_key}")
+            raise ValueError(
+                f"Model configuration not found for: {resolved_provider_display_name}/{resolved_model_id_key}"
+            )
 
-        provider_enum = ModelRegistry.get_provider_enum_by_display_name(resolved_provider_display_name)
+        provider_enum = ModelRegistry.get_provider_enum_by_display_name(
+            resolved_provider_display_name
+        )
         if not provider_enum or provider_enum not in self.interfaces:
-            raise ValueError(f"API interface for '{resolved_provider_display_name}' not set up. "
-                           f"Ensure API key is valid, saved, and app restarted if changed.")
+            raise ValueError(
+                f"API interface for '{resolved_provider_display_name}' not set up. "
+                f"Ensure API key is valid, saved, and app restarted if changed."
+            )
 
         interface = self.interfaces[provider_enum]
         return provider_enum, config, interface
-    
+
     def generate(
         self,
         messages: List[Dict[str, Any]],
         provider_display_name: Optional[str] = None,
         model_id_key: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Tuple[str, Optional[TokenUsage]]:
         """AI 응답 생성"""
-        _provider_enum, config, interface = self._get_active_config(provider_display_name, model_id_key)
+        _provider_enum, config, interface = self._get_active_config(
+            provider_display_name, model_id_key
+        )
 
         # 매개변수 준비
         params = {
             "temperature": self.settings.get("defaults.temperature", 0.7),
-            "max_tokens": min(self.settings.get("defaults.max_tokens", config.max_tokens), config.max_tokens)
+            "max_tokens": min(
+                self.settings.get("defaults.max_tokens", config.max_tokens),
+                config.max_tokens,
+            ),
         }
         params.update(kwargs)
 
-        logger.info(f"Generating with {config.provider.value}/{config.model_name} "
-                   f"(Display: {config.display_name}). Messages: {len(messages)}. Params: {params}")
+        logger.info(
+            f"Generating with {config.provider.value}/{config.model_name} "
+            f"(Display: {config.display_name}). Messages: {len(messages)}. Params: {params}"
+        )
 
         # API 호출
-        response_text, usage = interface.generate(messages, model=config.model_name, **params)
+        response_text, usage = interface.generate(
+            messages, model=config.model_name, **params
+        )
 
         # 사용량 추적
         if usage and self.usage_tracker:
@@ -225,29 +276,42 @@ class EnhancedModelManager(ModelManager):
         messages: List[Dict[str, Any]],
         provider_display_name: Optional[str] = None,
         model_id_key: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Generator[Tuple[str, Optional[TokenUsage]], None, None]:
         """AI 스트리밍 응답 생성"""
-        _provider_enum, config, interface = self._get_active_config(provider_display_name, model_id_key)
+        _provider_enum, config, interface = self._get_active_config(
+            provider_display_name, model_id_key
+        )
 
         # 스트리밍 지원 확인
         if not config.supports_streaming:
-            logger.info(f"Model {config.display_name} does not support streaming. Falling back to generate.")
-            actual_provider_name = provider_display_name or self.settings.get("ui.selected_provider")
+            logger.info(
+                f"Model {config.display_name} does not support streaming. Falling back to generate."
+            )
+            actual_provider_name = provider_display_name or self.settings.get(
+                "ui.selected_provider"
+            )
             actual_model_key = model_id_key or self.settings.get("defaults.model")
-            response_text, usage = self.generate(messages, actual_provider_name, actual_model_key, **kwargs)
+            response_text, usage = self.generate(
+                messages, actual_provider_name, actual_model_key, **kwargs
+            )
             yield response_text, usage
             return
 
         # 매개변수 준비
         params = {
             "temperature": self.settings.get("defaults.temperature", 0.7),
-            "max_tokens": min(self.settings.get("defaults.max_tokens", config.max_tokens), config.max_tokens)
+            "max_tokens": min(
+                self.settings.get("defaults.max_tokens", config.max_tokens),
+                config.max_tokens,
+            ),
         }
         params.update(kwargs)
 
-        logger.info(f"Streaming with {config.provider.value}/{config.model_name} "
-                   f"(Display: {config.display_name}). Messages: {len(messages)}. Params: {params}")
+        logger.info(
+            f"Streaming with {config.provider.value}/{config.model_name} "
+            f"(Display: {config.display_name}). Messages: {len(messages)}. Params: {params}"
+        )
 
         accumulated_response = ""
         final_usage_data: Optional[TokenUsage] = None
@@ -257,18 +321,30 @@ class EnhancedModelManager(ModelManager):
 
         for chunk_data in stream_iterator:
             try:
-                if isinstance(chunk_data, tuple) and len(chunk_data) == 2 and chunk_data[0] == "__USAGE__":
+                if (
+                    isinstance(chunk_data, tuple)
+                    and len(chunk_data) == 2
+                    and chunk_data[0] == "__USAGE__"
+                ):
                     # 사용량 정보
                     final_usage_data = chunk_data[1]
                     if final_usage_data and self.usage_tracker:
-                        input_cost = (final_usage_data.input_tokens / 1000) * config.input_cost_per_1k
-                        output_cost = (final_usage_data.output_tokens / 1000) * config.output_cost_per_1k
+                        input_cost = (
+                            final_usage_data.input_tokens / 1000
+                        ) * config.input_cost_per_1k
+                        output_cost = (
+                            final_usage_data.output_tokens / 1000
+                        ) * config.output_cost_per_1k
                         final_usage_data.cost_usd = round(input_cost + output_cost, 6)
                         self.usage_tracker.add_usage(final_usage_data)
-                elif isinstance(chunk_data, str) and chunk_data.strip():  # ← 빈 문자열 체크 추가
+                elif (
+                    isinstance(chunk_data, str) and chunk_data.strip()
+                ):  # ← 빈 문자열 체크 추가
                     # 텍스트 청크
                     accumulated_response += chunk_data
-                    yield self.output_renderer.process_output(accumulated_response), final_usage_data
+                    yield self.output_renderer.process_output(
+                        accumulated_response
+                    ), final_usage_data
                 elif chunk_data is None:
                     # None 값은 무시하고 계속 진행
                     continue
@@ -279,24 +355,33 @@ class EnhancedModelManager(ModelManager):
                 continue  # 개별 청크 오류 시 전체 스트리밍을 중단하지 않음
 
         # OpenAI의 경우 수동으로 토큰 사용량 계산
-        if not final_usage_data and accumulated_response and config.provider == ModelProvider.OPENAI:
-            final_usage_data = self._estimate_openai_usage(messages, accumulated_response, config)
+        if (
+            not final_usage_data
+            and accumulated_response
+            and config.provider == ModelProvider.OPENAI
+        ):
+            final_usage_data = self._estimate_openai_usage(
+                messages, accumulated_response, config
+            )
             if final_usage_data and self.usage_tracker:
-                input_cost = (final_usage_data.input_tokens / 1000) * config.input_cost_per_1k
-                output_cost = (final_usage_data.output_tokens / 1000) * config.output_cost_per_1k
+                input_cost = (
+                    final_usage_data.input_tokens / 1000
+                ) * config.input_cost_per_1k
+                output_cost = (
+                    final_usage_data.output_tokens / 1000
+                ) * config.output_cost_per_1k
                 final_usage_data.cost_usd = round(input_cost + output_cost, 6)
                 self.usage_tracker.add_usage(final_usage_data)
-            yield self.output_renderer.process_output(accumulated_response), final_usage_data
+            yield self.output_renderer.process_output(
+                accumulated_response
+            ), final_usage_data
 
         # 최종 응답이 없는 경우
         elif not accumulated_response and final_usage_data:
             yield "", final_usage_data
 
     def _estimate_openai_usage(
-        self,
-        messages: List[Dict[str, Any]],
-        response_text: str,
-        config: ModelConfig
+        self, messages: List[Dict[str, Any]], response_text: str, config: ModelConfig
     ) -> Optional[TokenUsage]:
         """OpenAI 토큰 사용량 추정"""
         try:
@@ -317,7 +402,9 @@ class EnhancedModelManager(ModelManager):
             try:
                 enc = tiktoken.encoding_for_model(tiktoken_model_name)
             except KeyError:
-                logger.warning(f"Tiktoken encoding for '{tiktoken_model_name}' not found, using 'cl100k_base'.")
+                logger.warning(
+                    f"Tiktoken encoding for '{tiktoken_model_name}' not found, using 'cl100k_base'."
+                )
                 enc = tiktoken.get_encoding("cl100k_base")
 
             # 입력 토큰 계산
@@ -330,7 +417,9 @@ class EnhancedModelManager(ModelManager):
                     for part in msg.get("content", []):  # type: ignore
                         if part.get("type") == "text":
                             content_str += part.get("text", "") + "\n"
-                num_input_tokens += len(enc.encode(content_str)) + 5  # 메시지당 오버헤드
+                num_input_tokens += (
+                    len(enc.encode(content_str)) + 5
+                )  # 메시지당 오버헤드
 
             # 출력 토큰 계산
             num_output_tokens = len(enc.encode(response_text))
@@ -341,28 +430,36 @@ class EnhancedModelManager(ModelManager):
                 total_tokens=num_input_tokens + num_output_tokens,
                 model_name=config.model_name,
                 provider=config.provider.value,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-            logger.info(f"Manually constructed TokenUsage for OpenAI stream: {usage_data.to_dict()}")
+            logger.info(
+                f"Manually constructed TokenUsage for OpenAI stream: {usage_data.to_dict()}"
+            )
             return usage_data
 
         except ImportError:
-            logger.warning("tiktoken library not installed. Cannot calculate token usage for OpenAI streaming.")
+            logger.warning(
+                "tiktoken library not installed. Cannot calculate token usage for OpenAI streaming."
+            )
             return None
         except Exception as e:
-            logger.error(f"Error during manual TokenUsage construction for OpenAI stream: {e}")
+            logger.error(
+                f"Error during manual TokenUsage construction for OpenAI stream: {e}"
+            )
             return None
 
     def get_model_info(
         self,
         provider_display_name: Optional[str] = None,
-        model_id_key: Optional[str] = None
+        model_id_key: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """모델 정보 가져오기"""
         try:
-            _provider_enum, config, interface = self._get_active_config(provider_display_name, model_id_key)
-            
+            _provider_enum, config, interface = self._get_active_config(
+                provider_display_name, model_id_key
+            )
+
             return {
                 "config": {
                     "provider": config.provider.value,
@@ -371,14 +468,14 @@ class EnhancedModelManager(ModelManager):
                     "max_tokens": config.max_tokens,
                     "description": config.description,
                     "input_cost_per_1k": config.input_cost_per_1k,
-                    "output_cost_per_1k": config.output_cost_per_1k
+                    "output_cost_per_1k": config.output_cost_per_1k,
                 },
                 "features": {
                     "supports_streaming": config.supports_streaming,
                     "supports_functions": config.supports_functions,
-                    "supports_vision": config.supports_vision
+                    "supports_vision": config.supports_vision,
                 },
-                "interface_features": interface.get_supported_features()
+                "interface_features": interface.get_supported_features(),
             }
         except Exception as e:
             logger.error(f"Error getting model info: {e}")
@@ -390,32 +487,38 @@ class EnhancedModelManager(ModelManager):
             "valid": True,
             "errors": [],
             "warnings": [],
-            "provider_status": {}
+            "provider_status": {},
         }
 
         # 제공업체별 상태 확인
         for provider in ModelProvider:
             provider_key = provider.value
             api_key = self.settings.get_api_key(provider)
-            
+
             status = {
                 "has_api_key": bool(api_key),
                 "interface_initialized": provider in self.interfaces,
-                "available_models": len(ModelRegistry.get_models_for_provider(provider.name.capitalize()))
+                "available_models": len(
+                    ModelRegistry.get_models_for_provider(provider.name.capitalize())
+                ),
             }
-            
+
             if not api_key:
-                validation_result["warnings"].append(f"{provider.name} API key not configured")
+                validation_result["warnings"].append(
+                    f"{provider.name} API key not configured"
+                )
             elif provider not in self.interfaces:
-                validation_result["errors"].append(f"{provider.name} interface failed to initialize")
+                validation_result["errors"].append(
+                    f"{provider.name} interface failed to initialize"
+                )
                 validation_result["valid"] = False
-            
+
             validation_result["provider_status"][provider_key] = status
 
         # 선택된 모델 확인
         selected_provider = self.settings.get("ui.selected_provider")
         selected_model = self.settings.get("defaults.model")
-        
+
         if not selected_provider:
             validation_result["warnings"].append("No provider selected")
         elif not selected_model:

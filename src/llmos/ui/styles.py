@@ -8,7 +8,8 @@ import streamlit as st
 
 def load_custom_css():
     """커스텀 CSS 로드"""
-    st.markdown("""
+    st.markdown(
+        """
     <style>
         /* 메인 앱 레이아웃 */
         .stApp { 
@@ -255,84 +256,110 @@ def load_custom_css():
             transition: box-shadow 0.2s ease;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def apply_theme(theme: str = "auto"):
     """테마 적용"""
     if theme == "dark":
-        st.markdown("""
+        st.markdown(
+            """
         <style>
             .stApp {
                 background-color: #0e1117;
                 color: #fafafa;
             }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
     elif theme == "light":
-        st.markdown("""
+        st.markdown(
+            """
         <style>
             .stApp {
                 background-color: #ffffff;
                 color: #262730;
             }
         </style>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_custom_header(title: str, subtitle: str = ""):
     """커스텀 헤더 렌더링"""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="llmos-header llmos-fade-in">
         {title}
     </div>
-    """, unsafe_allow_html=True)
-    
+    """,
+        unsafe_allow_html=True,
+    )
+
     if subtitle:
-        st.markdown(f"""
+        st.markdown(
+            f"""
         <div style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 2rem;">
             {subtitle}
         </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_status_badge(status: str, text: str):
     """상태 배지 렌더링"""
     status_class = f"llmos-status-{status}"
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <span class="{status_class}">
         {text}
     </span>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_metric_card(title: str, value: str, delta: str = "", color: str = "blue"):
     """메트릭 카드 렌더링"""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="llmos-usage-metric llmos-hover-lift">
         <div style="font-size: 0.8rem; opacity: 0.8;">{title}</div>
         <div style="font-size: 1.5rem; font-weight: 700; color: {color};">{value}</div>
         {f'<div style="font-size: 0.7rem; opacity: 0.6;">{delta}</div>' if delta else ''}
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_session_item(title: str, subtitle: str = "", is_active: bool = False):
     """세션 아이템 렌더링"""
     active_class = "llmos-session-active" if is_active else ""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div class="llmos-session-item {active_class} llmos-slide-in">
         <div style="font-weight: 600; font-size: 0.9rem;">{title}</div>
         {f'<div style="font-size: 0.7rem; opacity: 0.7;">{subtitle}</div>' if subtitle else ''}
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_loading(text: str = "로딩 중..."):
     """로딩 표시"""
-    st.markdown(f"""
+    st.markdown(
+        f"""
     <div style="text-align: center; padding: 2rem;">
         <div class="llmos-loading"></div>
         <div style="margin-top: 1rem; opacity: 0.7;">{text}</div>
     </div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )

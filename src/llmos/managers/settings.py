@@ -12,7 +12,12 @@ from typing import Any, Dict
 from dotenv import load_dotenv
 
 from ..models.enums import ModelProvider
-from ..core.config import DEFAULT_CONFIG_DIR, CHAT_SESSIONS_DIR, ARTIFACTS_DIR, USAGE_DATA_DIR
+from ..core.config import (
+    DEFAULT_CONFIG_DIR,
+    CHAT_SESSIONS_DIR,
+    ARTIFACTS_DIR,
+    USAGE_DATA_DIR,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +30,7 @@ class SettingsManager:
         self.config_file = self.config_path / "settings.json"
         self.env_file = self.config_path / ".env"
         self.settings: Dict[str, Any] = {}
-        
+
         self._ensure_config_directory()
         self.load_settings()
 
@@ -38,16 +43,16 @@ class SettingsManager:
         # 환경 변수 파일 로드
         if self.env_file.exists():
             load_dotenv(self.env_file, override=True)
-        
+
         # 기본 설정
         defaults = self._get_default_settings()
-        
+
         # 설정 파일에서 로드
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r', encoding='utf-8') as f:
+                with open(self.config_file, "r", encoding="utf-8") as f:
                     loaded_settings = json.load(f)
-                
+
                 self.settings = defaults.copy()
                 for k, v in loaded_settings.items():
                     if isinstance(v, dict) and isinstance(self.settings.get(k), dict):
@@ -59,7 +64,7 @@ class SettingsManager:
                 self.settings = defaults
         else:
             self.settings = defaults
-        
+
         # 설정 저장
         self.save_settings()
 
@@ -67,39 +72,38 @@ class SettingsManager:
         """기본 설정 반환"""
         return {
             "api_keys": {
-                p.value: os.getenv(f"{p.name}_API_KEY", "") 
-                for p in ModelProvider
+                p.value: os.getenv(f"{p.name}_API_KEY", "") for p in ModelProvider
             },
             "paths": {
                 "chat_sessions": str(self.config_path / CHAT_SESSIONS_DIR),
                 "artifacts": str(self.config_path / ARTIFACTS_DIR),
-                "usage_tracking": str(self.config_path / USAGE_DATA_DIR)
+                "usage_tracking": str(self.config_path / USAGE_DATA_DIR),
             },
             "defaults": {
                 "models_by_provider": {
                     "OpenAI": "gpt-4.1-mini",
-                    "Google": "gemini-2.5-flash-preview-05-20", 
-                    "Anthropic": "claude-sonnet-4-20250514"
+                    "Google": "gemini-2.5-flash-preview-05-20",
+                    "Anthropic": "claude-sonnet-4-20250514",
                 },
                 "temperature": 0.7,
-                "max_tokens": 4096
+                "max_tokens": 4096,
             },
             "ui": {
                 "selected_provider": "Anthropic",  # ← 기본 제공업체 설정
                 "theme": "auto",
-                "language": "ko"
+                "language": "ko",
             },
             "features": {
                 "auto_title_generation": True,
                 "usage_tracking": True,
-                "debug_mode": False
-            }
+                "debug_mode": False,
+            },
         }
 
     def save_settings(self):
         """설정 파일 저장"""
         try:
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+            with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(self.settings, f, indent=2, ensure_ascii=False)
         except Exception as e:
             logger.error(f"Error saving settings: {e}")
@@ -108,7 +112,7 @@ class SettingsManager:
         """설정 값 가져오기 (점 표기법 지원)"""
         val = self.settings
         try:
-            for k in key_path.split('.'):
+            for k in key_path.split("."):
                 val = val[k]
             return val
         except (KeyError, TypeError):
@@ -117,12 +121,12 @@ class SettingsManager:
     def set(self, key_path: str, value: Any):
         """설정 값 설정 (점 표기법 지원)"""
         lvl = self.settings
-        keys = key_path.split('.')
-        
+        keys = key_path.split(".")
+
         # 중간 딕셔너리들 생성
         for k in keys[:-1]:
             lvl = lvl.setdefault(k, {})
-        
+
         # 최종 값 설정
         lvl[keys[-1]] = value
         self.save_settings()
@@ -132,28 +136,28 @@ class SettingsManager:
         env_key = f"{provider_val.upper()}_API_KEY"
         lines = []
         found = False
-        
+
         # 기존 .env 파일 읽기
         if self.env_file.exists():
-            with open(self.env_file, 'r', encoding='utf-8') as f:
+            with open(self.env_file, "r", encoding="utf-8") as f:
                 for line in f:
                     if line.strip().startswith(f"{env_key}="):
                         lines.append(f"{env_key}={api_key}\n")
                         found = True
                     else:
                         lines.append(line)
-        
+
         # 새 키 추가
         if not found:
             lines.append(f"{env_key}={api_key}\n")
-        
+
         # .env 파일 쓰기
         try:
-            with open(self.env_file, 'w', encoding='utf-8') as f:
+            with open(self.env_file, "w", encoding="utf-8") as f:
                 f.writelines(lines)
         except Exception as e:
             logger.error(f"Error writing to .env: {e}")
-        
+
         # 환경 변수와 설정에 저장
         os.environ[env_key] = api_key
         self.set(f"api_keys.{provider_val}", api_key)
@@ -191,18 +195,19 @@ class SettingsManager:
         # API 키는 보안상 제외
         if "api_keys" in export_data:
             export_data["api_keys"] = {
-                k: "***" if v else "" 
-                for k, v in export_data["api_keys"].items()
+                k: "***" if v else "" for k, v in export_data["api_keys"].items()
             }
         return export_data
 
-    def import_settings(self, settings_data: Dict[str, Any], include_api_keys: bool = False):
+    def import_settings(
+        self, settings_data: Dict[str, Any], include_api_keys: bool = False
+    ):
         """설정 가져오기"""
         for key, value in settings_data.items():
             if key == "api_keys" and not include_api_keys:
                 continue
             self.set(key, value)
-        
+
     def get_default_model_for_provider(self, provider_name: str) -> str:
         """특정 제공업체의 기본 모델 반환"""
         default_models = self.get("defaults.models_by_provider", {})

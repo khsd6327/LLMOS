@@ -23,8 +23,8 @@ __all__ = [
     "create_app",
     "run_app",
     "SettingsManager",
-    "ChatSessionManager", 
+    "ChatSessionManager",
     "ArtifactManager",
     "UsageTracker",
-    "EnhancedModelManager"
+    "EnhancedModelManager",
 ]

@@ -17,9 +17,7 @@ class AppLogHandler(logging.Handler):
         super().__init__()
         self.records: Deque[str] = deque(maxlen=maxlen)
         self.setFormatter(
-            logging.Formatter(
-                '%(asctime)s - %(levelname)s - %(message)s (%(name)s)'
-            )
+            logging.Formatter("%(asctime)s - %(levelname)s - %(message)s (%(name)s)")
         )
 
     def emit(self, record: logging.LogRecord):
@@ -60,11 +58,11 @@ class AppLogHandler(logging.Handler):
         """로그 검색"""
         matching_logs = []
         query_lower = query.lower()
-        
+
         for log_entry in self.records:
             if query_lower in log_entry.lower():
                 matching_logs.append(log_entry)
-        
+
         return matching_logs
 
 
@@ -76,14 +74,14 @@ def setup_logging(level: int = logging.INFO):
     """로깅 설정"""
     # 루트 로거 설정
     root_logger = logging.getLogger()
-    
+
     # 기본 설정
     logging.basicConfig(
         level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
-    
+
     # 앱 로그 핸들러 추가
     if app_log_handler not in root_logger.handlers:
         root_logger.addHandler(app_log_handler)
