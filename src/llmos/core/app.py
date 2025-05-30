@@ -24,6 +24,7 @@ from ..managers.chat_sessions import ChatSessionManager
 from ..managers.artifacts import ArtifactManager
 from ..managers.usage_tracker import UsageTracker
 from ..managers.model_manager import EnhancedModelManager
+from ..managers.spotify_manager import SpotifyManager
 from ..ui.components import EnhancedUI
 from ..ui.styles import load_custom_css, apply_theme
 from ..ui.sidebar import Sidebar
@@ -31,7 +32,10 @@ from ..ui.pages.chat import ChatPage
 from ..ui.pages.settings import SettingsPage
 from ..ui.pages.artifacts import ArtifactsPage
 from ..ui.pages.debug import DebugPage
+from ..ui.pages.spotify import render_spotify_page
+from ..ui.pages.debug import DebugPage
 from ..utils.logging_handler import setup_logging, get_log_handler
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +55,7 @@ class EnhancedLLMOSApp:
         self.model_manager = EnhancedModelManager(self.settings, self.usage_tracker)
         self.artifacts = ArtifactManager(self.settings.get("paths.artifacts"))
         self.chat_manager = ChatSessionManager(self.settings.get("paths.chat_sessions"))
+        self.spotify_manager = SpotifyManager(self.settings)
 
         # UI 컴포넌트
         self.ui = EnhancedUI()
@@ -60,7 +65,7 @@ class EnhancedLLMOSApp:
 
         # 페이지들
         self.chat_page = ChatPage(self.chat_manager, self.model_manager, self.ui)
-        self.settings_page = SettingsPage(self.settings, self.model_manager, self.ui)
+        self.settings_page = SettingsPage(self.settings, self.model_manager, self.spotify_manager, self.ui)
         self.artifacts_page = ArtifactsPage(self.artifacts, self.ui)
         self.debug_page = DebugPage(
             self.settings,
@@ -88,6 +93,7 @@ class EnhancedLLMOSApp:
             "show_artifacts_page": False,
             "show_debug_page": False,
             "show_export_page": False,
+            "show_spotify_page": False,            
             # 편집 상태
             "editing_message_key": None,
             "edit_text_content": "",
@@ -186,6 +192,8 @@ class EnhancedLLMOSApp:
             self.artifacts_page.render()
         elif st.session_state.show_debug_page:
             self.debug_page.render()
+        elif st.session_state.show_spotify_page:
+            render_spotify_page(self.spotify_manager, self.ui)
         else:
             # 메인 채팅 페이지
             self._render_main_layout()

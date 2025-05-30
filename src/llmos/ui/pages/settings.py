@@ -8,10 +8,14 @@ from typing import Dict, Any
 
 import streamlit as st
 
+from ...managers.spotify_manager import SpotifyManager
 from ...managers.settings import SettingsManager
 from ...managers.model_manager import EnhancedModelManager
 from ...models.enums import ModelProvider
 from ...ui.components import EnhancedUI
+
+logger = logging.getLogger(__name__)
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,34 +27,40 @@ class SettingsPage:
         self,
         settings_manager: SettingsManager,
         model_manager: EnhancedModelManager,
+        spotify_manager: SpotifyManager, # <--- spotify_manager 인자 추가
         ui: EnhancedUI,
     ):
         self.settings = settings_manager
         self.model_manager = model_manager
+        self.spotify_manager = spotify_manager # <--- self.spotify_manager로 저장
         self.ui = ui
-
+        
     def render(self):
         """설정 페이지 렌더링"""
         st.header("⚙️ 애플리케이션 설정")
 
-        # 뒒로가기 버튼
+        # 뒤로가기 버튼
         if st.button("⬅️ 채팅으로 돌아가기", key="back_from_settings_page_btn"):
             st.session_state.show_settings_page = False
             st.rerun()
 
         # 탭으로 설정 섹션 분리
-        tabs = st.tabs(["🔑 API 키", "🎛️ 기본 설정", "🎨 UI 설정", "🔧 고급 설정"])
+        tab_titles = ["🔑 API 키", "🎛️ 기본 설정", "🎨 UI 설정", "🎵 Spotify API", "🔧 고급 설정"] # <--- "Spotify API" 탭 제목 추가
+        tabs = st.tabs(tab_titles)
 
-        with tabs[0]:
+        with tabs[0]: # API 키
             self._render_api_keys_section()
 
-        with tabs[1]:
+        with tabs[1]: # 기본 설정
             self._render_default_settings_section()
 
-        with tabs[2]:
+        with tabs[2]: # UI 설정
             self._render_ui_settings_section()
 
-        with tabs[3]:
+        with tabs[3]: # Spotify API (새로운 탭)
+            self._render_spotify_api_settings_section() # 이 메서드는 곧 만들 예정입니다.
+
+        with tabs[4]: # 고급 설정 (인덱스가 하나씩 밀립니다)
             self._render_advanced_settings_section()
 
     def _render_api_keys_section(self):
@@ -189,6 +199,95 @@ class SettingsPage:
         )
         self.settings.set("features.debug_mode", debug_mode)
 
+    def _render_spotify_api_settings_section(self):
+        """Spotify API 설정 섹션 렌더링"""
+        st.subheader("🎵 Spotify API 연동 설정")
+
+        # 현재 저장된 Spotify 설정을 불러옵니다.
+        saved_client_id = self.settings.get("spotify_client_id", "")
+        saved_client_secret = self.settings.get("spotify_client_secret", "") # 비밀번호 필드이므로 값은 직접 보이지 않습니다.
+        saved_redirect_uri = self.settings.get("spotify_redirect_uri", "http://127.0.0.1:8888/callback")
+        saved_port_type = self.settings.get("spotify_port_type", "fixed")
+
+        st.markdown(
+            """
+            LLMOS에서 Spotify 기능을 사용하려면, Spotify 개발자 대시보드에서 애플리케이션을 생성하고 다음 정보를 얻어야 합니다:
+            1. **Client ID**
+            2. **Client Secret**
+            3. **Redirect URI 설정:** `http://127.0.0.1:8888/callback` (또는 아래 입력한 URI)을 Spotify 앱 설정에 추가해야 합니다.
+
+            [Spotify Developer Dashboard 바로가기](https://developer.spotify.com/dashboard/)
+            """
+        )
+
+        with st.form("spotify_api_settings_form"):
+            client_id = st.text_input(
+                "Spotify Client ID",
+                value=saved_client_id,
+                key="settings_page_spotify_client_id",
+                help="Spotify 개발자 대시보드에서 발급받은 Client ID입니다."
+            )
+            client_secret = st.text_input(
+                "Spotify Client Secret",
+                value=saved_client_secret, # 입력 필드가 password 타입이므로 실제 값은 가려집니다.
+                type="password",
+                key="settings_page_spotify_client_secret",
+                help="Spotify 개발자 대시보드에서 발급받은 Client Secret입니다."
+            )
+            redirect_uri = st.text_input(
+                "Spotify Redirect URI",
+                value=saved_redirect_uri,
+                key="settings_page_spotify_redirect_uri",
+                help="Spotify 앱 설정에 등록한 Redirect URI와 정확히 일치해야 합니다."
+            )
+
+            port_options = ["fixed", "dynamic"]
+            try:
+                # 저장된 값이 유효한 옵션 중 하나인지 확인하고, 아니면 기본값(fixed)의 인덱스 사용
+                default_port_index = port_options.index(saved_port_type)
+            except ValueError:
+                default_port_index = 0 # 'fixed'
+
+            port_type = st.radio(
+                "인증 시 사용할 로컬 포트 타입",
+                options=port_options,
+                index=default_port_index,
+                format_func=lambda x: "고정 포트 (예: 8888)" if x == "fixed" else "동적 포트 (자동 할당)",
+                key="settings_page_spotify_port_type",
+                help="대부분의 경우 기본값을 유지해도 괜찮습니다. 고정 포트 사용 시 다른 프로그램과의 충돌에 유의하세요."
+            )
+
+            submitted = st.form_submit_button("💾 Spotify 설정 저장", use_container_width=True)
+
+            if submitted:
+                if client_id and client_secret and redirect_uri:
+                    # SettingsManager를 통해 설정 값을 저장
+                    self.settings.set("spotify_client_id", client_id)
+                    self.settings.set("spotify_client_secret", client_secret)
+                    self.settings.set("spotify_redirect_uri", redirect_uri)
+                    self.settings.set("spotify_port_type", port_type)
+                    
+                    # SpotifyManager의 내부 설정을 다시 로드하도록 강제
+                    try:
+                        self.spotify_manager._load_spotify_settings() # SpotifyManager 상태 업데이트
+                        st.success("✅ Spotify API 설정이 성공적으로 저장되었습니다!")
+                        # UI에 변경사항(예: 아래 상태 메시지)을 즉시 반영하기 위해 rerun
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"❌ Spotify 설정을 적용하는 중 오류가 발생했습니다: {str(e)}")
+                        logger.error(f"Error reloading spotify_manager settings after save: {e}")
+                else:
+                    st.error("⚠️ Client ID, Client Secret, Redirect URI는 반드시 입력해야 합니다.")
+        
+        st.markdown("---")
+        st.markdown("#### 현재 Spotify 연동 상태")
+        if self.spotify_manager.is_configured():
+            st.success("✅ Spotify API 정보가 애플리케이션에 설정되어 있습니다.")
+            # 인증 상태는 Spotify 페이지에서 직접 확인/진행하도록 유도
+            st.info("ℹ️ 실제 Spotify 계정 인증은 Spotify 기능 페이지에서 진행할 수 있습니다.")
+        else:
+            st.error("❌ Spotify API 정보가 아직 설정되지 않았습니다. 위 양식을 작성하고 저장해주세요.")
+            
     def _render_ui_settings_section(self):
         """UI 설정 섹션"""
         st.subheader("사용자 인터페이스 설정")

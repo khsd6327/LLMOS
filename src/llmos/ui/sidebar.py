@@ -166,6 +166,13 @@ class Sidebar:
             st.session_state.show_artifacts_page = True
             st.rerun()
 
+        # Spotify 페이지
+        if st.button(
+            "🎵 Spotify", key="sidebar_spotify_btn", use_container_width=True
+        ):
+            st.session_state.show_spotify_page = True
+            st.rerun()
+        
         # 디버그 페이지
         if st.button(
             "🐛 디버그 정보", key="sidebar_debug_btn", use_container_width=True

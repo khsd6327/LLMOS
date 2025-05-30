@@ -43,6 +43,8 @@ class UIPage(Enum):
     ARTIFACTS = "artifacts"
     DEBUG = "debug"
     EXPORT = "export"
+    SPOTIFY = "spotify"
+
 
 
 class LogLevel(Enum):
@@ -53,3 +55,22 @@ class LogLevel(Enum):
     WARNING = "WARNING"
     ERROR = "ERROR"
     CRITICAL = "CRITICAL"
+    
+class SpotifyTimeRange(Enum):
+    """Spotify Top 트랙 시간 범위"""
+    
+    SHORT_TERM = "short_term"  # 약 4주
+    MEDIUM_TERM = "medium_term"  # 약 6개월
+    LONG_TERM = "long_term"  # 전체 기간
+
+
+class SpotifySortKey(Enum):
+    """Spotify 플레이리스트 정렬 기준"""
+    
+    NAME = "name"  # 곡 제목
+    ARTISTS = "artists"  # 아티스트명
+    ALBUM_NAME = "album_name"  # 앨범명
+    ADDED_AT = "added_at"  # 추가된 날짜
+    RELEASE_DATE = "release_date"  # 발매일
+    DURATION_MS = "duration_ms"  # 곡 길이
+    POPULARITY = "popularity"  # 인기도

@@ -186,3 +186,116 @@ class AppState:
             is_initialized=data.get("is_initialized", False),
             last_activity=last_activity,
         )
+@dataclass
+class SpotifyTrack:
+    """Spotify 트랙 정보"""
+    
+    id: str
+    name: str
+    artists: str  # 쉼표로 구분된 아티스트 목록
+    duration_ms: int
+    album_name: str
+    release_date: str
+    popularity: int
+    added_at: Optional[str] = None
+    raw_genres: List[str] = None
+    mapped_genre: str = "기타"
+    
+    def __post_init__(self):
+        if self.raw_genres is None:
+            self.raw_genres = []
+    
+    def to_dict(self) -> dict:
+        """딕셔너리로 변환"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "artists": self.artists,
+            "duration_ms": self.duration_ms,
+            "album_name": self.album_name,
+            "release_date": self.release_date,
+            "popularity": self.popularity,
+            "added_at": self.added_at,
+            "raw_genres": self.raw_genres,
+            "mapped_genre": self.mapped_genre,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "SpotifyTrack":
+        """딕셔너리에서 객체 생성"""
+        return cls(
+            id=data["id"],
+            name=data["name"],
+            artists=data.get("artists", ""),
+            duration_ms=data.get("duration_ms", 0),
+            album_name=data.get("album_name", "N/A"),
+            release_date=data.get("release_date", "N/A"),
+            popularity=data.get("popularity", 0),
+            added_at=data.get("added_at"),
+            raw_genres=data.get("raw_genres", []),
+            mapped_genre=data.get("mapped_genre", "기타"),
+        )
+
+
+@dataclass
+class SpotifyPlaylist:
+    """Spotify 플레이리스트 정보"""
+    
+    id: str
+    name: str
+    tracks_total: int
+    owner_id: Optional[str] = None
+    description: Optional[str] = None
+    public: bool = False
+    
+    def to_dict(self) -> dict:
+        """딕셔너리로 변환"""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "tracks_total": self.tracks_total,
+            "owner_id": self.owner_id,
+            "description": self.description,
+            "public": self.public,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "SpotifyPlaylist":
+        """딕셔너리에서 객체 생성"""
+        return cls(
+            id=data["id"],
+            name=data["name"],
+            tracks_total=data.get("tracks_total", 0),
+            owner_id=data.get("owner_id"),
+            description=data.get("description"),
+            public=data.get("public", False),
+        )
+
+
+@dataclass
+class SpotifySettings:
+    """Spotify API 설정"""
+    
+    client_id: str
+    client_secret: str
+    redirect_uri: str
+    port_type: str = "fixed"  # "fixed" or "dynamic"
+    cache_path: str = ".spotify_cache"
+    
+    def to_dict(self) -> dict:
+        """딕셔너리로 변환 (secret 제외)"""
+        return {
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,
+            "port_type": self.port_type,
+            "cache_path": self.cache_path,
+            # client_secret은 보안상 제외
+        }
+    
+    def is_valid(self) -> bool:
+        """설정이 유효한지 확인"""
+        return all([
+            self.client_id,
+            self.client_secret,
+            self.redirect_uri
+        ])
