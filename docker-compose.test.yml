@@ -1,0 +1,31 @@
+# docker-compose.test.yml
+# 테스트 환경용 설정
+
+version: '3.8'
+
+services:
+  llmos-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: llmos-test
+    environment:
+      - LLMOS_TEST_MODE=true
+      - OPENAI_API_KEY=test-key
+      - ANTHROPIC_API_KEY=test-key
+      - GOOGLE_API_KEY=test-key
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+        pip install -e .[dev] &&
+        pytest tests/ --cov=src/llmos --cov-report=html --cov-report=term-missing
+      "
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
