@@ -25,6 +25,7 @@ from ..managers.artifacts import ArtifactManager
 from ..managers.usage_tracker import UsageTracker
 from ..managers.model_manager import EnhancedModelManager
 from ..managers.spotify_manager import SpotifyManager
+from ..managers.favorite_manager import FavoriteManager
 from ..ui.components import EnhancedUI
 from ..ui.styles import load_custom_css, apply_theme
 from ..ui.sidebar import Sidebar
@@ -56,6 +57,7 @@ class EnhancedLLMOSApp:
         self.artifacts = ArtifactManager(self.settings.get("paths.artifacts"))
         self.chat_manager = ChatSessionManager(self.settings.get("paths.chat_sessions"))
         self.spotify_manager = SpotifyManager(self.settings)
+        self.favorite_manager = FavoriteManager(storage_dir=self.settings.get("paths.favorites"))
 
         # UI 컴포넌트
         self.ui = EnhancedUI()
@@ -64,7 +66,7 @@ class EnhancedLLMOSApp:
         self.sidebar = Sidebar(self)
 
         # 페이지들
-        self.chat_page = ChatPage(self.chat_manager, self.model_manager, self.ui)
+        self.chat_page = ChatPage(self.chat_manager, self.model_manager, self.ui, self.favorite_manager)
         self.settings_page = SettingsPage(self.settings, self.model_manager, self.spotify_manager, self.ui)
         self.artifacts_page = ArtifactsPage(self.artifacts, self.ui)
         self.debug_page = DebugPage(
@@ -72,6 +74,7 @@ class EnhancedLLMOSApp:
             self.chat_manager,
             self.model_manager,
             self.usage_tracker,
+            self.favorite_manager,
             self.ui,
         )
 

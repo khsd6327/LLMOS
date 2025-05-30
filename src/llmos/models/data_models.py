@@ -5,7 +5,7 @@ LLM OS - 데이터 모델 정의
 
 import base64
 import logging
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
@@ -299,3 +299,57 @@ class SpotifySettings:
             self.client_secret,
             self.redirect_uri
         ])
+        
+        
+@dataclass
+class FavoriteMessage:
+    """즐겨찾기된 메시지 데이터 모델"""
+
+    id: str  # 즐겨찾기 고유 ID
+    session_id: str  # 원본 메시지가 속한 세션 ID
+    message_id: str  # 원본 메시지의 고유 ID (ChatSession.messages 내 메시지 식별자 역할)
+    role: str  # 메시지 역할 (예: "user", "assistant")
+    content: str  # 메시지 본문
+    favorited_at: datetime  # 즐겨찾기 지정 시간
+    created_at: datetime # 원본 메시지 생성 시간 (메시지가 처음 기록된 시간)
+    model_provider: Optional[ModelProvider] = None # 메시지 생성 시 사용된 모델 제공자 (AI 응답인 경우)
+    model_name: Optional[str] = None # 메시지 생성 시 사용된 모델명 (AI 응답인 경우)
+    context_messages: Optional[List[Dict[str, Any]]] = None  # 즐겨찾기 시점의 대화 문맥 (ChatSession.messages와 유사한 형식)
+    tags: List[str] = field(default_factory=list) # 사용자가 추가할 수 있는 태그
+    notes: Optional[str] = None # 사용자가 추가할 수 있는 간단한 메모
+
+    def to_dict(self) -> Dict[str, Any]:
+        """딕셔너리로 변환 (JSON 직렬화용)"""
+        return {
+            "id": self.id,
+            "session_id": self.session_id,
+            "message_id": self.message_id,
+            "role": self.role,
+            "content": self.content,
+            "favorited_at": self.favorited_at.isoformat(),
+            "created_at": self.created_at.isoformat(),
+            "model_provider": self.model_provider.value if self.model_provider else None,
+            "model_name": self.model_name,
+            "context_messages": self.context_messages,
+            "tags": self.tags,
+            "notes": self.notes,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "FavoriteMessage":
+        """딕셔너리에서 객체 생성"""
+        provider_val = data.get("model_provider")
+        return cls(
+            id=data["id"],
+            session_id=data["session_id"],
+            message_id=data["message_id"],
+            role=data["role"],
+            content=data["content"],
+            favorited_at=datetime.fromisoformat(data["favorited_at"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            model_provider=ModelProvider(provider_val) if provider_val else None,
+            model_name=data.get("model_name"),
+            context_messages=data.get("context_messages"),
+            tags=data.get("tags", []),
+            notes=data.get("notes"),
+        )

@@ -35,6 +35,7 @@ DEFAULT_CONFIG_DIR = ".llm_os_config"
 CHAT_SESSIONS_DIR = "chat_sessions"
 ARTIFACTS_DIR = "artifacts"
 USAGE_DATA_DIR = "usage_data"
+FAVORITES_DIR = "favorites"
 
 # 데이터 관리 설정
 DATA_CLEANUP_KEEP_DAYS = 90

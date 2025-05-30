@@ -1,4 +1,4 @@
-# src/llmos/interfaces/spotify.py
+# src/llmos/ui/pages/spotify.py
 """
 Spotify 페이지 UI
 """

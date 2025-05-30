@@ -7,6 +7,7 @@ import base64
 import hashlib
 import io
 import logging
+import os
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import Any, Dict, List, Optional, Union, Tuple
 from PIL import Image
 import math
 import re
+
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +95,17 @@ def format_number(number: Union[int, float], precision: int = 2) -> str:
         return f"{number:,.{precision}f}"
     return f"{number:,}"
 
+def ensure_directory_exists(dir_path: str):
+    """지정된 디렉토리가 존재하지 않으면 생성합니다."""
+    if not os.path.exists(dir_path):
+        try:
+            os.makedirs(dir_path)
+            logger.info(f"Created directory: {dir_path}")
+        except OSError as e:
+            logger.error(f"Error creating directory {dir_path}: {e}")
+            raise # 에러를 다시 발생시켜 호출한 쪽에서 알 수 있도록 함
+    else:
+        logger.debug(f"Directory already exists: {dir_path}")
 
 def parse_data_uri(data_uri: str) -> Tuple[str, bytes]:
     """Data URI 파싱"""

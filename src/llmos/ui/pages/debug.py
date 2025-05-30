@@ -20,6 +20,7 @@ from ...managers.usage_tracker import UsageTracker
 from ...ui.components import EnhancedUI
 from ...utils.logging_handler import get_log_handler
 from ...core.config import APP_VERSION, APP_NAME
+from ...managers.favorite_manager import FavoriteManager
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +34,14 @@ class DebugPage:
         chat_manager: ChatSessionManager,
         model_manager: EnhancedModelManager,
         usage_tracker: UsageTracker,
+        favorite_manager: FavoriteManager,
         ui: EnhancedUI,
     ):
         self.settings = settings_manager
         self.chat_manager = chat_manager
         self.model_manager = model_manager
         self.usage_tracker = usage_tracker
+        self.favorite_manager = favorite_manager
         self.ui = ui
 
     def render(self):
@@ -52,25 +55,22 @@ class DebugPage:
 
         # 탭으로 섹션 분리
         tabs = st.tabs(
-            ["🔍 시스템 정보", "📋 로그", "⚙️ 설정", "💬 세션", "📊 성능", "🧪 테스트"]
+            ["🔍 시스템 정보", "📋 로그", "⚙️ 설정", "💬 세션", "⭐ 즐겨찾기", "📊 성능", "🧪 테스트"]
         )
 
         with tabs[0]:
             self._render_system_info_section()
-
         with tabs[1]:
             self._render_logs_section()
-
         with tabs[2]:
             self._render_settings_section()
-
         with tabs[3]:
             self._render_sessions_section()
-
-        with tabs[4]:
+        with tabs[4]: # 새로 추가된 즐겨찾기 탭
+            self._render_favorites_section() # 이 메서드를 아래에 만들 것입니다.
+        with tabs[5]: # 기존 '성능' 탭 (인덱스 변경)
             self._render_performance_section()
-
-        with tabs[5]:
+        with tabs[6]: # 기존 '테스트' 탭 (인덱스 변경)
             self._render_test_section()
 
     def _render_system_info_section(self):
@@ -436,6 +436,50 @@ class DebugPage:
 
         except ImportError:
             st.info("메모리 정보를 보려면 psutil 패키지를 설치하세요.")
+
+    def _render_favorites_section(self):
+        """즐겨찾기 정보 섹션 (디버그용)"""
+        st.subheader("⭐ 저장된 즐겨찾기 메시지")
+
+        if not hasattr(self, 'favorite_manager') or not self.favorite_manager:
+            st.warning("FavoriteManager가 DebugPage에 제대로 전달되지 않았거나 초기화되지 않았습니다.")
+            return
+
+        try:
+            if st.button("즐겨찾기 목록 새로고침", key="refresh_favorites_debug_btn"):
+                # FavoriteManager 내부의 _favorites는 _load_favorites() 호출 시 갱신됨
+                # 또는 간단히 st.rerun()을 통해 UI를 다시 그리면서 데이터를 다시 로드하게 할 수 있음
+                self.favorite_manager._favorites = self.favorite_manager._load_favorites() # 내부 캐시 직접 갱신
+                st.rerun()
+
+            all_favorites = self.favorite_manager.list_all_favorites(sort_by_date=True, ascending=False)
+            
+            st.metric("총 즐겨찾기 개수", len(all_favorites))
+
+            if not all_favorites:
+                st.info("저장된 즐겨찾기가 없습니다.")
+                return
+
+            st.write("최근 즐겨찾기 목록 (최대 10개):")
+            for i, fav in enumerate(all_favorites[:10]):
+                exp_title = f"ID: {fav.id} | 내용: {fav.content[:40]}"
+                exp_title += "..." if len(fav.content) > 40 else ""
+                
+                with st.expander(exp_title, expanded=False):
+                    # FavoriteMessage 객체의 내용을 좀 더 상세히 보여주기
+                    st.json(fav.to_dict(), expanded=False) # 객체를 dict로 변환하여 JSON 형태로 표시
+                    
+                    # 간단한 삭제 기능 (디버그용)
+                    if st.button("이 즐겨찾기 삭제", key=f"delete_fav_debug_{fav.id}_{i}", type="secondary"):
+                        if self.favorite_manager.remove_favorite(fav.id):
+                            st.success(f"즐겨찾기 '{fav.id}'가 삭제되었습니다.")
+                            # 목록을 즉시 갱신하기 위해 rerun 필요
+                            st.rerun()
+                        else:
+                            st.error(f"즐겨찾기 '{fav.id}' 삭제에 실패했습니다.")
+        except Exception as e:
+            logger.error(f"즐겨찾기 정보 로드/표시 중 오류: {e}", exc_info=True)
+            st.error(f"즐겨찾기 정보를 가져오는 중 오류가 발생했습니다: {str(e)}")
 
     def _render_test_section(self):
         """테스트 섹션"""

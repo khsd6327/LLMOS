@@ -17,6 +17,7 @@ from ...models.data_models import ChatSession, TokenUsage
 from ...models.model_registry import ModelRegistry
 from ...ui.components import EnhancedUI
 from ...utils.helpers import detect_image_mime_type, validate_image
+from ...managers.favorite_manager import FavoriteManager
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,12 @@ class ChatPage:
         chat_manager: ChatSessionManager,
         model_manager: EnhancedModelManager,
         ui: EnhancedUI,
+        favorite_manager: FavoriteManager,
     ):
         self.chat_manager = chat_manager
         self.model_manager = model_manager
         self.ui = ui
+        self.favorite_manager = favorite_manager
 
     def render(self):
         """채팅 페이지 렌더링"""
@@ -178,6 +181,12 @@ class ChatPage:
                     help="AI 응답 재시도",
                 ):
                     self._retry_last_response(session)
+            
+            # 즐겨찾기 버튼 (AI 응답에만)
+            # msg_index는 _render_message_actions의 파라미터로 이미 존재합니다.
+            if action_cols[2].button("⭐", key=f"fav_btn_{msg_key}", help="즐겨찾기에 추가/제거"):
+                self._toggle_favorite_message(session, msg_data, msg_index) # msg_index 전달
+                st.rerun()
 
     def _copy_to_clipboard(self, text: str):
         """클립보드 복사"""
@@ -562,3 +571,95 @@ class ChatPage:
             )
 
         st.rerun()
+
+    def _toggle_favorite_message(self, session: ChatSession, msg_data: Dict[str, Any], msg_idx: int):
+        """
+        메시지를 즐겨찾기에 추가하거나 이미 있다면 제거합니다. (현재는 추가 기능만 구현)
+        """
+        # FavoriteMessage에 필요한 정보 추출 및 준비
+        message_content_str = ""
+        if isinstance(msg_data.get("content"), str):
+            message_content_str = msg_data["content"]
+        elif isinstance(msg_data.get("content"), list):  # 멀티모달 메시지의 텍스트 부분 처리
+            for part in msg_data["content"]:
+                if part.get("type") == "text":
+                    message_content_str = part["text"]
+                    break
+        
+        # 내용이 없는 경우 즐겨찾기 방지 (예: 이미지 표시용 메시지)
+        if not message_content_str and msg_data.get("type") == "image_display":
+            st.toast("텍스트 내용이 없는 이미지는 즐겨찾기할 수 없습니다.", icon="⚠️")
+            return
+        if not message_content_str: # 일반적인 빈 메시지
+            st.toast("내용이 없는 메시지는 즐겨찾기할 수 없습니다.", icon="⚠️")
+            return
+
+        # 컨텍스트 메시지 준비 (예: 현재 메시지를 포함하여 이전 N개)
+        # FavoriteMessage.context_messages는 List[Dict[str, Any]] 형식 (role, content)
+        context_messages_for_favorite = []
+        context_window_start = max(0, msg_idx - 4) # 현재 메시지 포함 최대 5개
+        for i in range(context_window_start, msg_idx + 1):
+            ctx_msg = session.messages[i]
+            ctx_role = ctx_msg.get("role")
+            ctx_content_value = ctx_msg.get("content")
+            
+            ctx_content_str = ""
+            if isinstance(ctx_content_value, str):
+                ctx_content_str = ctx_content_value
+            elif isinstance(ctx_content_value, list):
+                for part in ctx_content_value:
+                    if part.get("type") == "text":
+                        ctx_content_str = part["text"]
+                        break
+            
+            # 이미지 표시용 메시지는 컨텍스트에서 제외 (텍스트가 있다면 포함)
+            if ctx_msg.get("type") == "image_display" and not ctx_content_str:
+                continue
+                
+            context_messages_for_favorite.append({
+                "role": ctx_role,
+                "content": ctx_content_str
+            })
+
+        # 원본 메시지 생성 시간 (ChatSession의 메시지에는 타임스탬프가 없어, 임시로 현재 시간 사용 또는 다른 방법 강구 필요)
+        # FavoriteMessage의 created_at은 원본 메시지의 생성 시간이지만, 현재 msg_data에 없으므로 임시 처리
+        original_message_created_at = msg_data.get("timestamp", datetime.now()) # msg_data에 'timestamp'가 있다면 사용
+
+        # 모델 정보 (AI 메시지인 경우) - 이것도 msg_data에 명시적으로 없으면 현재 선택된 모델로 임시 처리
+        model_provider_enum = None
+        model_name_str = None
+        if msg_data["role"] == "assistant":
+            # 현재 선택된 모델 정보를 가져오려고 시도 (최선은 아니지만 차선책)
+            current_model_config = self._get_current_model_config() # 이 메서드가 ChatPage에 이미 존재함
+            if current_model_config:
+                model_provider_enum = current_model_config.provider # ModelProvider Enum 값
+                model_name_str = current_model_config.model_name
+
+        # 메시지 고유 ID (세션 내에서 메시지를 식별할 방법. 인덱스는 불안정하므로 개선 필요)
+        # 우선은 인덱스를 기반으로 한 식별자 사용.
+        # TODO: ChatSession의 각 message에 고유 ID (UUID)를 부여하는 것이 장기적으로 더 좋음.
+        message_identifier_in_session = f"message_index_{msg_idx}"
+
+        try:
+            # TODO: 즐겨찾기 여부 확인 후 토글 로직 구현 (FavoriteManager에 is_favorited(session_id, message_id) 같은 메서드 필요)
+            # 현재는 단순 추가 로직만 구현
+            
+            # 기존에 동일한 session_id와 message_identifier_in_session으로 추가된 즐겨찾기가 있는지 확인
+            # (이 부분은 FavoriteManager에 find_by_message_origin(session_id, message_id) 같은 메서드가 필요합니다.
+            #  지금은 간단하게 중복 추가될 수 있도록 둡니다. FavoriteManager가 ID로만 관리하므로, 내용은 중복될 수 있습니다.)
+
+            self.favorite_manager.add_favorite(
+                session_id=session.id,
+                message_id=message_identifier_in_session,
+                role=msg_data["role"],
+                content=message_content_str,
+                created_at=original_message_created_at, 
+                model_provider=model_provider_enum,
+                model_name=model_name_str,
+                context_messages=context_messages_for_favorite,
+                # tags와 notes는 초기에는 비워둠
+            )
+            st.toast("메시지를 즐겨찾기에 추가했습니다!", icon="⭐")
+        except Exception as e:
+            logger.error(f"즐겨찾기 추가 중 오류 발생: {e}", exc_info=True)
+            st.error(f"즐겨찾기를 추가하는 중 오류가 발생했습니다: {str(e)}")

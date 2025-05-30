@@ -17,6 +17,7 @@ from ..core.config import (
     CHAT_SESSIONS_DIR,
     ARTIFACTS_DIR,
     USAGE_DATA_DIR,
+    FAVORITES_DIR,
 )
 
 logger = logging.getLogger(__name__)
@@ -78,6 +79,7 @@ class SettingsManager:
                 "chat_sessions": str(self.config_path / CHAT_SESSIONS_DIR),
                 "artifacts": str(self.config_path / ARTIFACTS_DIR),
                 "usage_tracking": str(self.config_path / USAGE_DATA_DIR),
+                "favorites": str(self.config_path / FAVORITES_DIR),
             },
             "defaults": {
                 "models_by_provider": {
