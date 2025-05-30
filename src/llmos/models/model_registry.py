@@ -3,150 +3,122 @@
 LLM OS - 모델 레지스트리
 """
 
+import json
+import logging
+import os
 from typing import Dict, List, Optional
 
 from .data_models import ModelConfig
 from .enums import ModelProvider
 
+logger = logging.getLogger(__name__)
+
 
 class ModelRegistry:
     """AI 모델 설정 레지스트리"""
     
-    MODELS_BY_PROVIDER: Dict[str, Dict[str, any]] = {
-            "Google": {
-                "provider": ModelProvider.GOOGLE,
-                "models": {
-                    "gemini-2.5-flash-preview-05-20": ModelConfig(
-                        provider=ModelProvider.GOOGLE,
-                        model_name="models/gemini-2.5-flash-preview-05-20",
-                        display_name="Gemini 2.5 Flash Preview 05-20",
-                        max_tokens=65536,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Our best model in terms of price-performance, offering well-rounded capabilities. Supports thinking, code execution, and function calling.",
-                        input_cost_per_1k=0.00015,    # $0.15 per 1M tokens
-                        output_cost_per_1k=0.0006     # $0.60 per 1M tokens (non-thinking)
-                    ),
-                    "gemini-2.5-pro-preview-05-06": ModelConfig(
-                        provider=ModelProvider.GOOGLE,
-                        model_name="gemini-2.5-pro-preview-05-06",
-                        display_name="Gemini 2.5 Pro Preview",
-                        max_tokens=65536,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Our state-of-the-art thinking model, capable of reasoning over complex problems in code, math, and STEM. Supports large document analysis.",
-                        input_cost_per_1k=0.00125,    # $1.25 per 1M tokens (<=200k)
-                        output_cost_per_1k=0.01       # $10.00 per 1M tokens (<=200k)
-                    )
+    _models_data: Optional[Dict] = None
+    _models_by_provider: Optional[Dict[str, Dict]] = None
+    
+    @classmethod
+    def _load_models_data(cls) -> Dict:
+        """models.json 파일에서 모델 데이터 로드"""
+        if cls._models_data is not None:
+            return cls._models_data
+        
+        try:
+            # models.json 파일 경로 찾기
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            models_json_path = os.path.join(current_dir, "models.json")
+            
+            if not os.path.exists(models_json_path):
+                logger.error(f"models.json file not found at {models_json_path}")
+                raise FileNotFoundError(f"models.json file not found at {models_json_path}")
+            
+            # JSON 파일 로드
+            with open(models_json_path, 'r', encoding='utf-8') as f:
+                cls._models_data = json.load(f)
+            
+            logger.info(f"Successfully loaded models data from {models_json_path}")
+            return cls._models_data
+            
+        except Exception as e:
+            logger.error(f"Error loading models.json: {e}")
+            # 에러 시 빈 딕셔너리 반환
+            cls._models_data = {}
+            return cls._models_data
+    
+    @classmethod
+    def _get_models_by_provider(cls) -> Dict[str, Dict]:
+        """ModelConfig 객체로 변환된 모델 데이터 반환"""
+        if cls._models_by_provider is not None:
+            return cls._models_by_provider
+        
+        raw_data = cls._load_models_data()
+        cls._models_by_provider = {}
+        
+        try:
+            for provider_name, provider_data in raw_data.items():
+                # 제공업체 enum 변환
+                provider_enum_str = provider_data.get("provider", "")
+                try:
+                    provider_enum = ModelProvider[provider_enum_str]
+                except KeyError:
+                    logger.warning(f"Unknown provider enum: {provider_enum_str} for {provider_name}")
+                    continue
+                
+                # 모델들을 ModelConfig 객체로 변환
+                models = {}
+                for model_key, model_data in provider_data.get("models", {}).items():
+                    try:
+                        # provider enum 문자열을 실제 enum으로 변환
+                        model_provider_str = model_data.get("provider", "")
+                        model_provider_enum = ModelProvider[model_provider_str]
+                        
+                        # ModelConfig 객체 생성
+                        model_config = ModelConfig(
+                            provider=model_provider_enum,
+                            model_name=model_data.get("model_name", ""),
+                            display_name=model_data.get("display_name", ""),
+                            max_tokens=model_data.get("max_tokens", 4096),
+                            supports_streaming=model_data.get("supports_streaming", False),
+                            supports_functions=model_data.get("supports_functions", False),
+                            supports_vision=model_data.get("supports_vision", False),
+                            description=model_data.get("description", ""),
+                            input_cost_per_1k=model_data.get("input_cost_per_1k", 0.0),
+                            output_cost_per_1k=model_data.get("output_cost_per_1k", 0.0)
+                        )
+                        models[model_key] = model_config
+                        
+                    except Exception as e:
+                        logger.error(f"Error converting model {model_key} for {provider_name}: {e}")
+                        continue
+                
+                # 제공업체 데이터 저장
+                cls._models_by_provider[provider_name] = {
+                    "provider": provider_enum,
+                    "models": models
                 }
-            },
-            "OpenAI": {
-                "provider": ModelProvider.OPENAI,
-                "models": {
-                    "gpt-4.1": ModelConfig(
-                        provider=ModelProvider.OPENAI,
-                        model_name="gpt-4.1-2025-04-14",
-                        display_name="GPT-4.1",
-                        max_tokens=32768,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Flagship GPT model for complex tasks. Well suited for problem solving across domains with 1M+ context window.",
-                        input_cost_per_1k=0.002,      # $2.00 per 1M tokens
-                        output_cost_per_1k=0.008      # $8.00 per 1M tokens
-                    ),
-                    "o4-mini": ModelConfig(
-                        provider=ModelProvider.OPENAI,
-                        model_name="o4-mini-2025-04-16",
-                        display_name="o4-mini",
-                        max_tokens=100000,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Faster, more affordable reasoning model. Optimized for fast, effective reasoning with efficient performance in coding and visual tasks.",
-                        input_cost_per_1k=0.0011,     # $1.10 per 1M tokens
-                        output_cost_per_1k=0.0044     # $4.40 per 1M tokens
-                    ),
-                    "chatgpt-4o-latest": ModelConfig(
-                        provider=ModelProvider.OPENAI,
-                        model_name="chatgpt-4o-latest",
-                        display_name="ChatGPT-4o",
-                        max_tokens=16384,
-                        supports_streaming=True,
-                        supports_functions=False,
-                        supports_vision=True,
-                        description="GPT-4o model used in ChatGPT. Versatile, high-intelligence flagship model with text and image inputs.",
-                        input_cost_per_1k=0.005,      # $5.00 per 1M tokens
-                        output_cost_per_1k=0.015      # $15.00 per 1M tokens
-                    ),
-                    "gpt-4.1-mini": ModelConfig(
-                        provider=ModelProvider.OPENAI,
-                        model_name="gpt-4.1-mini-2025-04-14",
-                        display_name="GPT-4.1 mini",
-                        max_tokens=32768,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Balanced for intelligence, speed, and cost. Attractive model for many use cases with 1M+ context window.",
-                        input_cost_per_1k=0.0004,     # $0.40 per 1M tokens
-                        output_cost_per_1k=0.0016     # $1.60 per 1M tokens
-                    ),
-                    "gpt-4.1-nano": ModelConfig(
-                        provider=ModelProvider.OPENAI,
-                        model_name="gpt-4.1-nano-2025-04-14",
-                        display_name="GPT-4.1 nano",
-                        max_tokens=32768,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Fastest, most cost-effective GPT-4.1 model with 1M+ context window. Optimized for speed and efficiency.",
-                        input_cost_per_1k=0.0001,     # $0.10 per 1M tokens
-                        output_cost_per_1k=0.0004     # $0.40 per 1M tokens
-                    )
-                }
-            },
-            "Anthropic": {
-                "provider": ModelProvider.ANTHROPIC,
-                "models": {
-                    "claude-opus-4-20250514": ModelConfig(
-                        provider=ModelProvider.ANTHROPIC,
-                        model_name="claude-opus-4-20250514",
-                        display_name="Claude Opus 4",
-                        max_tokens=65536,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Anthropic's most powerful model with superior performance on highly complex tasks, including research and advanced analysis.",
-                        input_cost_per_1k=0.015,      # $15.00 per 1M tokens
-                        output_cost_per_1k=0.075      # $75.00 per 1M tokens
-                    ),
-                    "claude-sonnet-4-20250514": ModelConfig(
-                        provider=ModelProvider.ANTHROPIC,
-                        model_name="claude-sonnet-4-20250514",
-                        display_name="Claude Sonnet 4",
-                        max_tokens=65536,
-                        supports_streaming=True,
-                        supports_functions=True,
-                        supports_vision=True,
-                        description="Smart, efficient model for everyday use. Balanced performance for a wide range of tasks with excellent cost-effectiveness.",
-                        input_cost_per_1k=0.003,      # $3.00 per 1M tokens
-                        output_cost_per_1k=0.015      # $15.00 per 1M tokens
-                    )
-                }
-            }
-        }
+                
+            logger.info(f"Successfully converted {len(cls._models_by_provider)} providers to ModelConfig objects")
+            
+        except Exception as e:
+            logger.error(f"Error converting models data: {e}")
+            cls._models_by_provider = {}
+        
+        return cls._models_by_provider
     
     @classmethod
     def get_all_provider_display_names(cls) -> List[str]:
         """모든 제공업체 표시명 반환"""
-        return list(cls.MODELS_BY_PROVIDER.keys())
+        models_data = cls._get_models_by_provider()
+        return list(models_data.keys())
 
     @classmethod
     def get_models_for_provider(cls, provider_display_name: str) -> Dict[str, ModelConfig]:
         """특정 제공업체의 모든 모델 반환"""
-        return cls.MODELS_BY_PROVIDER.get(provider_display_name, {}).get("models", {})
+        models_data = cls._get_models_by_provider()
+        return models_data.get(provider_display_name, {}).get("models", {})
 
     @classmethod
     def get_model_config(cls, provider_display_name: str, model_id_key: str) -> Optional[ModelConfig]:
@@ -156,33 +128,77 @@ class ModelRegistry:
     @classmethod
     def get_provider_enum_by_display_name(cls, provider_display_name: str) -> Optional[ModelProvider]:
         """표시명으로 제공업체 Enum 반환"""
-        provider_data = cls.MODELS_BY_PROVIDER.get(provider_display_name)
+        models_data = cls._get_models_by_provider()
+        provider_data = models_data.get(provider_display_name)
         return provider_data["provider"] if provider_data else None
 
     @classmethod
     def add_model(cls, provider_display_name: str, model_id: str, config: ModelConfig):
-        """새 모델 추가"""
-        if provider_display_name not in cls.MODELS_BY_PROVIDER:
-            cls.MODELS_BY_PROVIDER[provider_display_name] = {
+        """새 모델 추가 (런타임에만 적용, JSON 파일은 수정하지 않음)"""
+        models_data = cls._get_models_by_provider()
+        if provider_display_name not in models_data:
+            models_data[provider_display_name] = {
                 "provider": config.provider,
                 "models": {}
             }
-        cls.MODELS_BY_PROVIDER[provider_display_name]["models"][model_id] = config
+        models_data[provider_display_name]["models"][model_id] = config
+        logger.info(f"Added model {model_id} to provider {provider_display_name} (runtime only)")
 
     @classmethod
     def remove_model(cls, provider_display_name: str, model_id: str) -> bool:
-        """모델 제거"""
-        if provider_display_name in cls.MODELS_BY_PROVIDER:
-            models = cls.MODELS_BY_PROVIDER[provider_display_name].get("models", {})
+        """모델 제거 (런타임에만 적용, JSON 파일은 수정하지 않음)"""
+        models_data = cls._get_models_by_provider()
+        if provider_display_name in models_data:
+            models = models_data[provider_display_name].get("models", {})
             if model_id in models:
                 del models[model_id]
+                logger.info(f"Removed model {model_id} from provider {provider_display_name} (runtime only)")
                 return True
         return False
 
     @classmethod
     def get_all_models(cls) -> Dict[str, Dict[str, ModelConfig]]:
         """모든 모델 반환"""
+        models_data = cls._get_models_by_provider()
         result = {}
-        for provider_name, provider_data in cls.MODELS_BY_PROVIDER.items():
+        for provider_name, provider_data in models_data.items():
             result[provider_name] = provider_data.get("models", {})
         return result
+    
+    @classmethod
+    def reload_models(cls):
+        """모델 데이터 다시 로드 (캐시 초기화)"""
+        cls._models_data = None
+        cls._models_by_provider = None
+        logger.info("Model data cache cleared, will reload on next access")
+    
+    @classmethod
+    def get_models_json_path(cls) -> str:
+        """models.json 파일 경로 반환"""
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(current_dir, "models.json")
+    
+    @classmethod
+    def validate_models_data(cls) -> Dict[str, any]:
+        """모델 데이터 유효성 검사"""
+        try:
+            models_data = cls._get_models_by_provider()
+            total_providers = len(models_data)
+            total_models = sum(len(provider_data.get("models", {})) for provider_data in models_data.values())
+            
+            return {
+                "valid": True,
+                "total_providers": total_providers,
+                "total_models": total_models,
+                "providers": list(models_data.keys()),
+                "message": f"Successfully loaded {total_providers} providers with {total_models} models"
+            }
+        except Exception as e:
+            return {
+                "valid": False,
+                "total_providers": 0,
+                "total_models": 0,
+                "providers": [],
+                "error": str(e),
+                "message": f"Failed to load models data: {e}"
+            }

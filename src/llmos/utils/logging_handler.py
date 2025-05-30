@@ -88,6 +88,12 @@ def setup_logging(level: int = logging.INFO):
     if app_log_handler not in root_logger.handlers:
         root_logger.addHandler(app_log_handler)
 
+
 def get_log_handler() -> AppLogHandler:
     """앱 로그 핸들러 반환"""
     return app_log_handler
+
+
+def get_app_logger(name: str = __name__) -> logging.Logger:
+    """애플리케이션 로거 반환 (누락된 함수 추가)"""
+    return logging.getLogger(name)
