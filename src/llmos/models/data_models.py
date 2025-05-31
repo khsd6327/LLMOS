@@ -9,7 +9,7 @@ from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
-from .enums import ModelProvider, ArtifactType
+from .enums import ModelProvider
 
 logger = logging.getLogger(__name__)
 
@@ -55,67 +55,6 @@ class TokenUsage:
         if isinstance(data.get("timestamp"), str):
             data["timestamp"] = datetime.fromisoformat(data["timestamp"])
         return cls(**data)
-
-
-@dataclass
-class Artifact:
-    """아티팩트 데이터 모델"""
-
-    id: str
-    type: ArtifactType
-    title: str
-    content: Any
-    tags: List[str]
-    created_at: datetime
-    updated_at: datetime
-    metadata: Dict[str, Any]
-
-    def to_dict(self) -> dict:
-        """딕셔너리로 변환 (직렬화용)"""
-        content_data = self.content
-        if self.type == ArtifactType.IMAGE and isinstance(self.content, bytes):
-            try:
-                content_data = base64.b64encode(self.content).decode("utf-8")
-            except Exception as e:
-                logger.warning(
-                    f"Failed to encode image content for artifact {self.id}: {e}"
-                )
-
-        return {
-            "id": self.id,
-            "type": self.type.value,
-            "title": self.title,
-            "content": content_data,
-            "tags": self.tags,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "metadata": self.metadata,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "Artifact":
-        """딕셔너리에서 객체 생성"""
-        content_data = data["content"]
-        artifact_type = ArtifactType(data["type"])
-
-        if artifact_type == ArtifactType.IMAGE and isinstance(content_data, str):
-            try:
-                content_data = base64.b64decode(content_data)
-            except Exception as e:
-                logger.warning(
-                    f"Could not decode base64 content for image artifact {data['id']}: {e}"
-                )
-
-        return cls(
-            id=data["id"],
-            type=artifact_type,
-            title=data["title"],
-            content=content_data,
-            tags=data.get("tags", []),
-            created_at=datetime.fromisoformat(data["created_at"]),
-            updated_at=datetime.fromisoformat(data["updated_at"]),
-            metadata=data.get("metadata", {}),
-        )
 
 
 @dataclass

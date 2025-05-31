@@ -270,14 +270,25 @@ class SettingsPage:
                     # SpotifyManager의 내부 설정을 다시 로드하도록 강제
                     try:
                         self.spotify_manager._load_spotify_settings() # SpotifyManager 상태 업데이트
-                        st.success("✅ Spotify API 설정이 성공적으로 저장되었습니다!")
-                        # UI에 변경사항(예: 아래 상태 메시지)을 즉시 반영하기 위해 rerun
-                        st.rerun()
+                        # session_state에 성공 상태 저장 (즉시 rerun하지 않음)
+                        st.session_state['spotify_settings_saved'] = True
                     except Exception as e:
                         st.error(f"❌ Spotify 설정을 적용하는 중 오류가 발생했습니다: {str(e)}")
                         logger.error(f"Error reloading spotify_manager settings after save: {e}")
                 else:
                     st.error("⚠️ Client ID, Client Secret, Redirect URI는 반드시 입력해야 합니다.")
+
+        # 성공 메시지 표시 (session_state 기반)
+        if st.session_state.get('spotify_settings_saved', False):
+            st.success("✅ Spotify API 설정이 성공적으로 저장되었습니다!")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 페이지 새로고침", key="spotify_settings_refresh"):
+                    st.session_state['spotify_settings_saved'] = False
+                    st.rerun()
+            with col2:
+                if st.button("❌ 메시지 닫기", key="spotify_settings_close"):
+                    st.session_state['spotify_settings_saved'] = False
         
         st.markdown("---")
         st.markdown("#### 현재 Spotify 연동 상태")

@@ -27,9 +27,6 @@ INITIAL_SIDEBAR_STATE = "expanded"
 SIDEBAR_MAX_SESSIONS = 10
 SESSION_TITLE_MAX_LENGTH = 30
 
-# 키보드 단축키 관련
-KEYBOARD_SHORTCUT_DEBOUNCE_TIME = 0.5
-
 # 파일 및 디렉토리 설정
 DEFAULT_CONFIG_DIR = ".llm_os_config"
 CHAT_SESSIONS_DIR = "chat_sessions"

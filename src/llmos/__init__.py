@@ -14,7 +14,6 @@ __description__ = "개인 맞춤형 AI 비서 시스템"
 from .core.app import EnhancedLLMOSApp, create_app, run_app
 from .managers.settings import SettingsManager
 from .managers.chat_sessions import ChatSessionManager
-from .managers.artifacts import ArtifactManager
 from .managers.usage_tracker import UsageTracker
 from .managers.model_manager import EnhancedModelManager
 
@@ -24,7 +23,6 @@ __all__ = [
     "run_app",
     "SettingsManager",
     "ChatSessionManager",
-    "ArtifactManager",
     "UsageTracker",
     "EnhancedModelManager",
 ]

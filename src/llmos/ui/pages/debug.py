@@ -110,7 +110,6 @@ class DebugPage:
             "설정 파일": str(self.settings.config_file),
             "환경 변수 파일": str(self.settings.env_file),
             "채팅 세션": self.settings.get("paths.chat_sessions"),
-            "아티팩트": self.settings.get("paths.artifacts"),
             "사용량 추적": self.settings.get("paths.usage_tracking"),
         }
 

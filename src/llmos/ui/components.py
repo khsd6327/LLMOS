@@ -21,7 +21,7 @@ class EnhancedUI:
 
     @staticmethod
     def render_usage_stats(usage_tracker):
-        """사용량 통계 렌더링 (세션 + 오늘 + 전체)"""
+        """사용량 통계 렌더링 (세션 + 오늘 + 전체) - 2x2 레이아웃 적용"""
         st.markdown("### 📊 사용량 통계")
 
         try:
@@ -29,49 +29,56 @@ class EnhancedUI:
             today_stats = usage_tracker.get_today_usage_from_summary()
             total_stats = usage_tracker.get_total_usage_from_history()
 
-            # 세션 사용량 (현재 앱 실행 이후)
+            # 세션 사용량 (현재 앱 실행 이후) - 2x2 레이아웃
             with st.expander("⚡ 현재 세션", expanded=True):
-                col1, col2, col3 = st.columns(3)
+                # 상단 행: 요청 + 토큰
+                col1, col2 = st.columns(2)
                 col1.metric("요청", f"{session_stats['total_requests']:,}")
                 col2.metric("토큰", f"{session_stats['total_tokens']:,}")
-
+                
+                # 하단 행: 비용 + 세션 시간
+                col3, col4 = st.columns(2)
                 session_cost_str = (
                     f"${session_stats['total_cost']:.4f}"
                     if session_stats["total_cost"] > 0.00001
                     else "$0.00"
                 )
                 col3.metric("비용 (USD)", session_cost_str)
-
-                # 세션 지속 시간 표시
+                
+                # 세션 지속 시간
                 session_duration = session_stats.get("session_duration_minutes", 0)
-                if session_duration > 0:
-                    st.caption(f"세션 시간: {session_duration:.1f}분")
+                duration_str = f"{session_duration:.1f}분" if session_duration > 0 else "0분"
+                col4.metric("세션 시간", duration_str)
 
-            # 오늘 사용량
+            # 오늘 사용량 - 2x2 레이아웃
             with st.expander("📅 오늘 사용량", expanded=False):
-                col1, col2, col3 = st.columns(3)
+                # 상단 행: 요청 + 토큰
+                col1, col2 = st.columns(2)
                 col1.metric("요청", f"{today_stats['total_requests']:,}")
                 col2.metric("토큰", f"{today_stats['total_tokens']:,}")
-
-                cost_str = (
+                
+                # 하단 행: 비용 (넓게)
+                today_cost_str = (
                     f"${today_stats['total_cost']:.4f}"
                     if today_stats["total_cost"] > 0.00001
                     else "$0.00"
                 )
-                col3.metric("비용 (USD)", cost_str)
+                st.metric("비용 (USD)", today_cost_str)
 
-            # 전체 사용량
+            # 전체 사용량 - 2x2 레이아웃
             with st.expander("📈 전체 사용량 (기록 기반)", expanded=False):
-                col1, col2, col3 = st.columns(3)
+                # 상단 행: 요청 + 토큰
+                col1, col2 = st.columns(2)
                 col1.metric("총 요청", f"{total_stats['total_requests']:,}")
                 col2.metric("총 토큰", f"{total_stats['total_tokens']:,}")
-
+                
+                # 하단 행: 비용 (넓게)
                 total_cost_str = (
                     f"${total_stats['total_cost']:.4f}"
                     if total_stats["total_cost"] > 0.00001
                     else "$0.00"
                 )
-                col3.metric("총 비용 (USD)", total_cost_str)
+                st.metric("총 비용 (USD)", total_cost_str)
 
         except Exception as e:
             st.error(f"사용량 통계 로드 중 오류: {e}")
@@ -379,235 +386,3 @@ class EnhancedUI:
             return False
 
         return None
-
-    @staticmethod
-    def render_keyboard_handler():
-        """전역 키보드 단축키 핸들러"""
-        st.markdown(
-            """
-        <script>
-        // 키보드 이벤트 리스너 (전역)
-        document.addEventListener('keydown', function(event) {
-            // Streamlit의 input 요소들에서는 단축키 비활성화
-            const activeElement = document.activeElement;
-            const isInputActive = activeElement && (
-                activeElement.tagName === 'INPUT' || 
-                activeElement.tagName === 'TEXTAREA' ||
-                activeElement.contentEditable === 'true'
-            );
-            
-            // 채팅 입력창에서는 Enter, Shift+Enter만 허용
-            if (isInputActive && activeElement.getAttribute('data-testid') === 'stChatInput') {
-                if (event.key === 'Enter') {
-                    if (event.shiftKey) {
-                        // Shift + Enter: 줄바꿈 (기본 동작)
-                        return;
-                    } else {
-                        // Enter: 메시지 전송 (기본 동작)
-                        return;
-                    }
-                }
-            }
-            
-            // 다른 입력 요소에서는 모든 단축키 비활성화
-            if (isInputActive) {
-                return;
-            }
-            
-            // 키 조합 확인
-            const key = event.key.toLowerCase();
-            const ctrl = event.ctrlKey || event.metaKey; // Mac의 Cmd 키도 지원
-            const shift = event.shiftKey;
-            
-            // 단축키 매핑
-            if (ctrl && key === 'n') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'new_chat'}, '*');
-            }
-            else if (ctrl && key === 's') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'save_favorite'}, '*');
-            }
-            else if (ctrl && key === 'f') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'search_chat'}, '*');
-            }
-            else if (ctrl && key === 'd') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'debug_page'}, '*');
-            }
-            else if (ctrl && key === ',') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'settings_page'}, '*');
-            }
-            else if (ctrl && key === 'e') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'edit_last_message'}, '*');
-            }
-            else if (key === 'escape') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'cancel_action'}, '*');
-            }
-        });
-        
-        // 단축키 도움말 토글 (F1 또는 ?)
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'F1' || event.key === '?') {
-                event.preventDefault();
-                window.parent.postMessage({type: 'streamlit:setComponentValue', value: 'show_shortcuts_help'}, '*');
-            }
-        });
-        </script>
-        """,
-            unsafe_allow_html=True,
-        )
-
-    @staticmethod
-    def render_shortcuts_help():
-        """단축키 도움말 표시"""
-        import platform
-
-        # 운영체제에 따른 수식키 표시
-        modifier_key = "Cmd" if platform.system() == "Darwin" else "Ctrl"
-
-        with st.expander("⌨️ 키보드 단축키", expanded=False):
-            st.markdown(
-                f"""
-            ### 📝 채팅 단축키
-            - **Enter**: 메시지 전송
-            - **Shift + Enter**: 줄바꿈
-            - **{modifier_key} + E**: 마지막 메시지 편집
-            
-            ### ⚡ 빠른 액션
-            - **{modifier_key} + N**: 새 채팅 시작
-            - **{modifier_key} + S**: 현재 응답 즐겨찾기 저장
-            - **{modifier_key} + F**: 채팅 내 검색
-            
-            ### 🛠️ 페이지 이동
-            - **{modifier_key} + D**: 디버그 페이지
-            - **{modifier_key} + ,**: 설정 페이지
-            
-            ### 🔧 기타
-            - **ESC**: 현재 작업 취소
-            - **F1 또는 ?**: 이 도움말 토글
-            
-            ---
-            💡 **팁**: 텍스트 입력 중일 때는 단축키가 비활성화됩니다.
-            
-            🍎 **Mac 사용자**: Ctrl 대신 Cmd 키를 사용하세요!
-            """
-            )
-
-    @staticmethod
-    def handle_keyboard_shortcut(shortcut_action: str, app_instance):
-        """키보드 단축키 액션 처리"""
-        if not shortcut_action:
-            return False
-
-        import platform
-
-        modifier_key = "Cmd" if platform.system() == "Darwin" else "Ctrl"
-
-        try:
-            if shortcut_action == "new_chat":
-                # 새 채팅 시작
-                app_instance._create_and_set_new_session()
-                st.session_state.pending_toast = (
-                    f"새 채팅을 시작했습니다! ({modifier_key}+N)",
-                    "✨",
-                )
-                return True
-
-            elif shortcut_action == "save_favorite":
-                # 현재 응답 즐겨찾기 저장 (구현 예정)
-                st.session_state.pending_toast = (
-                    f"즐겨찾기 기능은 곧 추가될 예정입니다. ({modifier_key}+S)",
-                    "🔖",
-                )
-                return True
-
-            elif shortcut_action == "search_chat":
-                # 채팅 검색 (구현 예정)
-                st.session_state.pending_toast = (
-                    f"검색 기능은 곧 추가될 예정입니다. ({modifier_key}+F)",
-                    "🔍",
-                )
-                return True
-
-            elif shortcut_action == "debug_page":
-                # 디버그 페이지로 이동
-                st.session_state.show_debug_page = True
-                st.session_state.show_settings_page = False
-                st.session_state.show_artifacts_page = False
-                return True
-
-            elif shortcut_action == "settings_page":
-                # 설정 페이지로 이동
-                st.session_state.show_settings_page = True
-                st.session_state.show_debug_page = False
-                st.session_state.show_artifacts_page = False
-                return True
-
-            elif shortcut_action == "edit_last_message":
-                # 마지막 메시지 편집
-                current_session = st.session_state.get("current_session")
-                if current_session and current_session.messages:
-                    # 마지막 사용자 메시지 찾기
-                    for i in range(len(current_session.messages) - 1, -1, -1):
-                        if current_session.messages[i]["role"] == "user":
-                            msg_key = f"msg_{current_session.id}_{i}"
-                            st.session_state.editing_message_key = msg_key
-
-                            # 편집할 텍스트 준비
-                            content = current_session.messages[i]["content"]
-                            if isinstance(content, str):
-                                st.session_state.edit_text_content = content
-                            elif isinstance(content, list):
-                                text_to_edit = ""
-                                for part in content:
-                                    if part.get("type") == "text":
-                                        text_to_edit = part["text"]
-                                        break
-                                st.session_state.edit_text_content = text_to_edit
-                            else:
-                                st.session_state.edit_text_content = ""
-
-                            st.session_state.pending_toast = (
-                                f"마지막 메시지 편집 모드가 활성화되었습니다. ({modifier_key}+E)",
-                                "✏️",
-                            )
-                            return True
-
-                st.session_state.pending_toast = (
-                    "편집할 사용자 메시지가 없습니다.",
-                    "⚠️",
-                )
-                return True
-
-            elif shortcut_action == "cancel_action":
-                # 현재 작업 취소
-                if st.session_state.get("editing_message_key"):
-                    st.session_state.editing_message_key = None
-                    st.session_state.pending_toast = (
-                        "편집을 취소했습니다. (ESC)",
-                        "❌",
-                    )
-                    return True
-                else:
-                    # 페이지를 메인으로 돌리기
-                    st.session_state.show_settings_page = False
-                    st.session_state.show_debug_page = False
-                    st.session_state.show_artifacts_page = False
-                    return True
-
-            elif shortcut_action == "show_shortcuts_help":
-                # 도움말 표시 토글
-                current_state = st.session_state.get("show_shortcuts_help", False)
-                st.session_state.show_shortcuts_help = not current_state
-                return True
-
-        except Exception as e:
-            st.session_state.pending_toast = (f"단축키 처리 중 오류: {e}", "❌")
-            logger.error(f"Error handling keyboard shortcut '{shortcut_action}': {e}")
-
-        return False

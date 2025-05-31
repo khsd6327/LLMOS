@@ -144,26 +144,9 @@ class Sidebar:
         """네비게이션 메뉴"""
         st.markdown("### 🛠️ 도구")
 
-        # 단축키 도움말 버튼 추가
-        help_state = st.session_state.get("show_shortcuts_help", False)
-        help_text = "단축키 숨기기" if help_state else "⌨️ 단축키 도움말"
-
-        if st.button(
-            help_text, key="sidebar_shortcuts_help_btn", use_container_width=True
-        ):
-            st.session_state.show_shortcuts_help = not help_state
-            st.rerun()
-
         # 설정 페이지
         if st.button("⚙️ 앱 설정", key="sidebar_settings_btn", use_container_width=True):
             st.session_state.show_settings_page = True
-            st.rerun()
-
-        # 아티팩트 페이지
-        if st.button(
-            "📚 아티팩트", key="sidebar_artifacts_btn", use_container_width=True
-        ):
-            st.session_state.show_artifacts_page = True
             st.rerun()
 
         # Spotify 페이지
@@ -171,6 +154,13 @@ class Sidebar:
             "🎵 Spotify", key="sidebar_spotify_btn", use_container_width=True
         ):
             st.session_state.show_spotify_page = True
+            st.rerun()
+            
+        # 즐겨찾기 페이지
+        if st.button(
+            "⭐ 즐겨찾기 모음", key="sidebar_favorites_btn", use_container_width=True
+        ):
+            st.session_state.show_favorites_page = True
             st.rerun()
         
         # 디버그 페이지

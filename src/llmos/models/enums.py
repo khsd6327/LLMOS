@@ -14,19 +14,6 @@ class ModelProvider(Enum):
     GOOGLE = "google"
 
 
-class ArtifactType(Enum):
-    """아티팩트 타입 열거형"""
-
-    TEXT = "text"
-    CODE = "code"
-    MARKDOWN = "markdown"
-    JSON = "json"
-    PROMPT = "prompt"
-    MEMORY = "memory"
-    RESEARCH = "research"
-    IMAGE = "image"
-
-
 class MessageRole(Enum):
     """메시지 역할 열거형"""
 
@@ -40,7 +27,6 @@ class UIPage(Enum):
 
     CHAT = "chat"
     SETTINGS = "settings"
-    ARTIFACTS = "artifacts"
     DEBUG = "debug"
     EXPORT = "export"
     SPOTIFY = "spotify"

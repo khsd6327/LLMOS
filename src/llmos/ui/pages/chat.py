@@ -350,10 +350,6 @@ class ChatPage:
                             api_messages, response_placeholder
                         )
 
-                    # 사용량 정보 표시
-                    if usage_info:
-                        self._display_usage_info(usage_info)
-
             except Exception as e:
                 logger.error(f"Error during AI response generation: {e}", exc_info=True)
                 full_response = f"오류가 발생했습니다: {e}"
@@ -419,18 +415,6 @@ class ChatPage:
 
         placeholder.markdown(response, unsafe_allow_html=True)
         return response, usage
-
-    def _display_usage_info(self, usage: TokenUsage):
-        """사용량 정보 표시"""
-        with st.expander("📊 토큰 사용량 (이번 응답)", expanded=False):
-            cost_display = (
-                f"${usage.cost_usd:.5f}" if usage.cost_usd > 0.000001 else "$0.00"
-            )
-
-            col_i, col_o, col_c = st.columns(3)
-            col_i.metric("입력 토큰", f"{usage.input_tokens:,}")
-            col_o.metric("출력 토큰", f"{usage.output_tokens:,}")
-            col_c.metric("예상 비용", cost_display)
 
     def _auto_generate_title(
         self, session: ChatSession, user_prompt: str, ai_response: str

@@ -16,30 +16,26 @@ from .config import (
     PAGE_ICON,
     PAGE_LAYOUT,
     INITIAL_SIDEBAR_STATE,
-    KEYBOARD_SHORTCUT_DEBOUNCE_TIME,
     DATA_CLEANUP_KEEP_DAYS,
 )
+
 from ..managers.settings import SettingsManager
 from ..managers.chat_sessions import ChatSessionManager
-from ..managers.artifacts import ArtifactManager
 from ..managers.usage_tracker import UsageTracker
 from ..managers.model_manager import EnhancedModelManager
 from ..managers.spotify_manager import SpotifyManager
 from ..managers.favorite_manager import FavoriteManager
+from ..ui.pages.favorites import FavoritesPage
 from ..ui.components import EnhancedUI
 from ..ui.styles import load_custom_css, apply_theme
 from ..ui.sidebar import Sidebar
 from ..ui.pages.chat import ChatPage
 from ..ui.pages.settings import SettingsPage
-from ..ui.pages.artifacts import ArtifactsPage
 from ..ui.pages.debug import DebugPage
 from ..ui.pages.spotify import render_spotify_page
-from ..ui.pages.debug import DebugPage
 from ..utils.logging_handler import setup_logging, get_log_handler
 
-
 logger = logging.getLogger(__name__)
-
 
 class EnhancedLLMOSApp:
     """향상된 LLM OS 애플리케이션 클래스"""
@@ -54,7 +50,6 @@ class EnhancedLLMOSApp:
 
         self.usage_tracker = UsageTracker(self.settings.get("paths.usage_tracking"))
         self.model_manager = EnhancedModelManager(self.settings, self.usage_tracker)
-        self.artifacts = ArtifactManager(self.settings.get("paths.artifacts"))
         self.chat_manager = ChatSessionManager(self.settings.get("paths.chat_sessions"))
         self.spotify_manager = SpotifyManager(self.settings)
         self.favorite_manager = FavoriteManager(storage_dir=self.settings.get("paths.favorites"))
@@ -68,7 +63,6 @@ class EnhancedLLMOSApp:
         # 페이지들
         self.chat_page = ChatPage(self.chat_manager, self.model_manager, self.ui, self.favorite_manager)
         self.settings_page = SettingsPage(self.settings, self.model_manager, self.spotify_manager, self.ui)
-        self.artifacts_page = ArtifactsPage(self.artifacts, self.ui)
         self.debug_page = DebugPage(
             self.settings,
             self.chat_manager,
@@ -77,7 +71,10 @@ class EnhancedLLMOSApp:
             self.favorite_manager,
             self.ui,
         )
-
+        
+        # 즐겨찾기 페이지 (새로 추가)
+        self.favorites_page = FavoritesPage(self.favorite_manager, self.ui)
+    
         # 세션 상태 초기화
         self._initialize_session_state()
 
@@ -93,10 +90,10 @@ class EnhancedLLMOSApp:
             "last_uploaded_filename_integrated": None,
             # 페이지 상태
             "show_settings_page": False,
-            "show_artifacts_page": False,
             "show_debug_page": False,
             "show_export_page": False,
-            "show_spotify_page": False,            
+            "show_spotify_page": False,
+            "show_favorites_page": False,
             # 편집 상태
             "editing_message_key": None,
             "edit_text_content": "",
@@ -107,10 +104,6 @@ class EnhancedLLMOSApp:
             # 모델 선택 상태 (새로 추가)
             "selected_provider": None,
             "selected_model": None,
-            # 키보드 단축키 관련 상태 (추가)
-            "keyboard_shortcut_action": None,
-            "show_shortcuts_help": False,
-            "last_shortcut_time": 0,
         }
 
         for key, default_value in default_state.items():
@@ -174,10 +167,6 @@ class EnhancedLLMOSApp:
         if theme != "auto":
             apply_theme(theme)
 
-        # 키보드 핸들러 및 처리 로직 추가
-        self.ui.render_keyboard_handler()
-        self._handle_keyboard_shortcuts()
-
         # 토스트 메시지 표시
         if st.session_state.get("pending_toast"):
             msg, icon = st.session_state.pending_toast
@@ -191,12 +180,12 @@ class EnhancedLLMOSApp:
         # 페이지 라우팅
         if st.session_state.show_settings_page:
             self.settings_page.render()
-        elif st.session_state.show_artifacts_page:
-            self.artifacts_page.render()
         elif st.session_state.show_debug_page:
             self.debug_page.render()
         elif st.session_state.show_spotify_page:
             render_spotify_page(self.spotify_manager, self.ui)
+        elif st.session_state.show_favorites_page:
+            self.favorites_page.render()
         else:
             # 메인 채팅 페이지
             self._render_main_layout()
@@ -307,9 +296,6 @@ class EnhancedLLMOSApp:
             if hasattr(log_handler, "cleanup"):
                 log_handler.cleanup()
 
-            # 임시 파일 정리
-            self.artifacts.cleanup_orphaned_files()
-
             # 오래된 사용량 데이터 정리 (90일 이상)
             self.usage_tracker.cleanup_old_data(keep_days=DATA_CLEANUP_KEEP_DAYS)
 
@@ -324,34 +310,10 @@ class EnhancedLLMOSApp:
             "name": APP_NAME,
             "version": APP_VERSION,
             "total_sessions": len(self.chat_manager.get_all_sessions()),
-            "total_artifacts": len(self.artifacts.get_all_artifacts()),
             "available_providers": len(self.model_manager.get_available_providers()),
             "current_session_id": st.session_state.get("current_session_id"),
             "settings_valid": self.model_manager.validate_configuration()["valid"],
         }
-
-    def _handle_keyboard_shortcuts(self):
-        """키보드 단축키 처리"""
-        shortcut_action = st.session_state.get("keyboard_shortcut_action")
-        if not shortcut_action:
-            return
-
-        # 중복 실행 방지 (0.5초 내 같은 액션 무시)
-        current_time = time.time()
-        last_time = st.session_state.get("last_shortcut_time", 0)
-
-        if current_time - last_time < KEYBOARD_SHORTCUT_DEBOUNCE_TIME:
-            st.session_state.keyboard_shortcut_action = None
-            return
-
-        # 단축키 액션 처리
-        if self.ui.handle_keyboard_shortcut(shortcut_action, self):
-            st.session_state.last_shortcut_time = current_time
-            st.rerun()
-
-        # 액션 처리 후 초기화
-        st.session_state.keyboard_shortcut_action = None
-
 
 def create_app() -> EnhancedLLMOSApp:
     """애플리케이션 인스턴스 생성"""
