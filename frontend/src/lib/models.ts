@@ -1,0 +1,166 @@
+// 모델 설정 데이터 (제공된 models.json 기반)
+import type { ModelsData, ModelConfig } from './api';
+
+export const MODELS_DATA: ModelsData = {
+  "Google": {
+    "provider": "GOOGLE",
+    "models": {
+      "gemini-2.5-flash-preview-05-20": {
+        "provider": "GOOGLE",
+        "model_name": "models/gemini-2.5-flash-preview-05-20",
+        "display_name": "Gemini 2.5 Flash Preview 05-20",
+        "max_tokens": 65536,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Our best model in terms of price-performance, offering well-rounded capabilities. Supports thinking, code execution, and function calling.",
+        "input_cost_per_1k": 0.00015,
+        "output_cost_per_1k": 0.0006
+      },
+      "gemini-2.5-pro-preview-05-06": {
+        "provider": "GOOGLE",
+        "model_name": "gemini-2.5-pro-preview-05-06",
+        "display_name": "Gemini 2.5 Pro Preview",
+        "max_tokens": 65536,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Our state-of-the-art thinking model, capable of reasoning over complex problems in code, math, and STEM. Supports large document analysis.",
+        "input_cost_per_1k": 0.00125,
+        "output_cost_per_1k": 0.01
+      }
+    }
+  },
+  "OpenAI": {
+    "provider": "OPENAI",
+    "models": {
+      "gpt-4.1": {
+        "provider": "OPENAI",
+        "model_name": "gpt-4.1-2025-04-14",
+        "display_name": "GPT-4.1",
+        "max_tokens": 32768,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Flagship GPT model for complex tasks. Well suited for problem solving across domains with 1M+ context window.",
+        "input_cost_per_1k": 0.002,
+        "output_cost_per_1k": 0.008
+      },
+      "o4-mini": {
+        "provider": "OPENAI",
+        "model_name": "o4-mini-2025-04-16",
+        "display_name": "o4-mini",
+        "max_tokens": 100000,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Faster, more affordable reasoning model. Optimized for fast, effective reasoning with efficient performance in coding and visual tasks.",
+        "input_cost_per_1k": 0.0011,
+        "output_cost_per_1k": 0.0044
+      },
+      "chatgpt-4o-latest": {
+        "provider": "OPENAI",
+        "model_name": "chatgpt-4o-latest",
+        "display_name": "ChatGPT-4o",
+        "max_tokens": 16384,
+        "supports_streaming": true,
+        "supports_functions": false,
+        "supports_vision": true,
+        "description": "GPT-4o model used in ChatGPT. Versatile, high-intelligence flagship model with text and image inputs.",
+        "input_cost_per_1k": 0.005,
+        "output_cost_per_1k": 0.015
+      },
+      "gpt-4.1-mini": {
+        "provider": "OPENAI",
+        "model_name": "gpt-4.1-mini-2025-04-14",
+        "display_name": "GPT-4.1 mini",
+        "max_tokens": 32768,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Balanced for intelligence, speed, and cost. Attractive model for many use cases with 1M+ context window.",
+        "input_cost_per_1k": 0.0004,
+        "output_cost_per_1k": 0.0016
+      },
+      "gpt-4.1-nano": {
+        "provider": "OPENAI",
+        "model_name": "gpt-4.1-nano-2025-04-14",
+        "display_name": "GPT-4.1 nano",
+        "max_tokens": 32768,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Fastest, most cost-effective GPT-4.1 model with 1M+ context window. Optimized for speed and efficiency.",
+        "input_cost_per_1k": 0.0001,
+        "output_cost_per_1k": 0.0004
+      }
+    }
+  },
+  "Anthropic": {
+    "provider": "ANTHROPIC",
+    "models": {
+      "claude-opus-4-20250514": {
+        "provider": "ANTHROPIC",
+        "model_name": "claude-opus-4-20250514",
+        "display_name": "Claude Opus 4",
+        "max_tokens": 65536,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Anthropic's most powerful model with superior performance on highly complex tasks, including research and advanced analysis.",
+        "input_cost_per_1k": 0.015,
+        "output_cost_per_1k": 0.075
+      },
+      "claude-sonnet-4-20250514": {
+        "provider": "ANTHROPIC",
+        "model_name": "claude-sonnet-4-20250514",
+        "display_name": "Claude Sonnet 4",
+        "max_tokens": 65536,
+        "supports_streaming": true,
+        "supports_functions": true,
+        "supports_vision": true,
+        "description": "Smart, efficient model for everyday use. Balanced performance for a wide range of tasks with excellent cost-effectiveness.",
+        "input_cost_per_1k": 0.003,
+        "output_cost_per_1k": 0.015
+      }
+    }
+  }
+};
+
+// 기본 모델 설정 (하드코딩된 부분)
+export const DEFAULT_MODELS = {
+  "OpenAI": "gpt-4.1-mini",
+  "Google": "gemini-2.5-flash-preview-05-20", 
+  "Anthropic": "claude-sonnet-4-20250514",
+};
+
+export const DEFAULT_PROVIDER = "Anthropic";
+
+// 유틸리티 함수들
+export function getAllProviders(): string[] {
+  return Object.keys(MODELS_DATA);
+}
+
+export function getModelsForProvider(provider: string): Record<string, ModelConfig> {
+  return MODELS_DATA[provider]?.models || {};
+}
+
+export function getModelConfig(provider: string, modelKey: string): ModelConfig | null {
+  return MODELS_DATA[provider]?.models[modelKey] || null;
+}
+
+export function getDefaultModelForProvider(provider: string): string {
+  return DEFAULT_MODELS[provider as keyof typeof DEFAULT_MODELS] || '';
+}
+
+export function formatCost(cost: number): string {
+  if (cost === 0) return '$0.00';
+  if (cost < 0.0001) return '<$0.0001';
+  return `$${cost.toFixed(4)}`;
+}
+
+export function formatTokens(tokens: number): string {
+  if (tokens < 1000) return tokens.toString();
+  if (tokens < 1000000) return `${(tokens / 1000).toFixed(1)}K`;
+  return `${(tokens / 1000000).toFixed(1)}M`;
+}
