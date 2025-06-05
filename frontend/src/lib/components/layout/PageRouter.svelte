@@ -1,9 +1,9 @@
 <script lang="ts">
   import { currentPage } from "$lib/stores";
-  import ChatPage from "./ChatPage.svelte";
-  import FavoritesPage from "./FavoritesPage.svelte";
-  import UsagePage from "./UsagePage.svelte";
-  import SettingsPage from "./SettingsPage.svelte";
+  import ChatPage from "../chat/ChatPage.svelte";
+  import FavoritesPage from "../pages/FavoritesPage.svelte";
+  import UsagePage from "../pages/UsagePage.svelte";
+  import SettingsPage from "../pages/SettingsPage.svelte";
   import { fade, slide } from "svelte/transition";
 
   // 페이지 전환 애니메이션 옵션

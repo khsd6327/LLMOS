@@ -9,9 +9,9 @@
     successMessage,
   } from "$lib/stores";
   import { showError } from "$lib/stores";
-  import Sidebar from "$lib/components/Sidebar.svelte";
-  import ErrorToast from "$lib/components/ErrorToast.svelte";
-  import SuccessToast from "$lib/components/SuccessToast.svelte";
+  import Sidebar from "$lib/components/layout/Sidebar.svelte";
+  import ErrorToast from "$lib/components/ui/ErrorToast.svelte";
+  import SuccessToast from "$lib/components/ui/SuccessToast.svelte";
 
   // 앱 초기화
   onMount(async () => {

@@ -23,8 +23,8 @@
     Edit,
     MoreVertical,
   } from "lucide-svelte";
-  import ModelSelector from "./ModelSelector.svelte";
-  import SessionUsageStats from "./SessionUsageStats.svelte";
+  import ModelSelector from "../ai/ModelSelector.svelte";
+  import SessionUsageStats from "../ai/SessionUsageStats.svelte";
 
   let editingSessionId: string | null = null;
   let editingTitle = "";

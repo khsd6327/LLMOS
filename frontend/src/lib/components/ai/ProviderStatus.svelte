@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import { api } from "$lib/api";
   import { showError, showSuccess } from "$lib/stores";
-  import StatusIndicator from "./StatusIndicator.svelte";
-  import LoadingSpinner from "./LoadingSpinner.svelte";
+  import StatusIndicator from "../ui/StatusIndicator.svelte";
+  import LoadingSpinner from "../ui/LoadingSpinner.svelte";
   import {
     RefreshCw,
     TestTube,

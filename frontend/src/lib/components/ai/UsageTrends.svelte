@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { api } from "$lib/api";
   import { showError } from "$lib/stores";
-  import LoadingSpinner from "./LoadingSpinner.svelte";
+  import LoadingSpinner from "../ui/LoadingSpinner.svelte";
   import {
     BarChart3,
     TrendingUp,

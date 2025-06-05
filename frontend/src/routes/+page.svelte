@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { currentSession, currentSessionId, sessions } from "$lib/stores";
-  import PageRouter from "$lib/components/PageRouter.svelte";
+  import PageRouter from "$lib/components/layout/PageRouter.svelte";
 
   onMount(() => {
     // 첫 번째 세션을 기본으로 선택
