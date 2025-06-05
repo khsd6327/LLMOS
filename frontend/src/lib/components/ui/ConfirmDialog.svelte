@@ -54,6 +54,7 @@
       : "btn-primary";
 </script>
 
+</style>
 {#if show}
   <!-- 백드롭 오버레이 -->
   <div
@@ -101,7 +102,7 @@
   </div>
 {/if}
 
-<style>
+
   /* 애니메이션 효과 */
   .fixed {
     animation: fadeIn 0.2s ease-out;
@@ -134,6 +135,19 @@
 
   /* 버튼 스타일 */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    outline: none;
   }
-</style>
+
+  .btn:focus {
+    ring: 2px;
+    ring-offset: 2px;
+  }
+</styl>

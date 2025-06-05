@@ -67,7 +67,20 @@
 <style>
   /* 부드러운 애니메이션 */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-950;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  .btn:focus {
+    ring: 2px;
+    ring-offset: 2px;
   }
 
   /* 호버 효과 강화 */

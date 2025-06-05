@@ -17,21 +17,46 @@
     Settings,
   } from "lucide-svelte";
 
-  export let showTestButtons: boolean = true;
-  export let showDetails: boolean = true;
-  export let keySuffix: string = "";
+  // Props with defaults
+  interface Props {
+    showTestButtons?: boolean;
+    showDetails?: boolean;
+    keySuffix?: string;
+  }
 
-  let loading = false;
-  let validationResult: any = {};
-  let statusSummary = {
+  let { 
+    showTestButtons = true, 
+    showDetails = true, 
+    keySuffix = "" 
+  }: Props = $props();
+
+  // State using Svelte 5 $state rune
+  let loading = $state(false);
+  let validationResult = $state<any>({});
+  let statusSummary = $state({
     total_providers: 0,
     active_providers: 0,
     errors: 0,
     warnings: 0,
-  };
+  });
 
   // 각 제공업체별 테스트 상태
-  let testingStates: Record<string, boolean> = {};
+  let testingStates = $state<Record<string, boolean>>({});
+
+  // Type definitions for provider status
+  interface ProviderStatus {
+    has_api_key: boolean;
+    interface_initialized: boolean;
+    available_models: number;
+    supported_features: Record<string, boolean>;
+  }
+
+  interface ValidationResult {
+    valid: boolean;
+    errors: string[];
+    warnings: string[];
+    provider_status: Record<string, ProviderStatus>;
+  }
 
   // 제공업체 상태 로드
   async function loadProviderStatus() {
@@ -77,14 +102,14 @@
             },
           },
         },
-      };
+      } as ValidationResult;
 
       // 상태 요약 계산
       const providers = Object.values(validationResult.provider_status);
       statusSummary = {
         total_providers: providers.length,
         active_providers: providers.filter(
-          (p: any) => p.has_api_key && p.interface_initialized
+          (p: ProviderStatus) => p.has_api_key && p.interface_initialized
         ).length,
         errors: validationResult.errors.length,
         warnings: validationResult.warnings.length,
@@ -127,7 +152,11 @@
   }
 
   // 상태 아이콘 및 텍스트 결정
-  function getProviderStatus(status: any) {
+  function getProviderStatus(status: ProviderStatus): {
+    icon: "success" | "error" | "warning" | "info" | "loading" | "pending" | "active";
+    text: string;
+    color: string;
+  } {
     if (status.has_api_key && status.interface_initialized) {
       return { icon: "success", text: "정상", color: "text-green-400" };
     } else if (status.has_api_key && !status.interface_initialized) {
@@ -157,7 +186,7 @@
 
     <button
       class="btn-secondary {loading ? 'animate-spin' : ''}"
-      on:click={loadProviderStatus}
+      onclick={loadProviderStatus}
       disabled={loading}
     >
       <RefreshCw size={16} class="mr-2" />
@@ -170,33 +199,25 @@
   {:else}
     <!-- 전체 상태 요약 -->
     <div class="grid grid-cols-4 gap-4">
-      <div
-        class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center"
-      >
+      <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-dark-100">
           {statusSummary.total_providers}
         </div>
         <div class="text-sm text-dark-400">총 제공업체</div>
       </div>
-      <div
-        class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center"
-      >
+      <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-green-400">
           {statusSummary.active_providers}
         </div>
         <div class="text-sm text-dark-400">활성 제공업체</div>
       </div>
-      <div
-        class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center"
-      >
+      <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-red-400">
           {statusSummary.errors}
         </div>
         <div class="text-sm text-dark-400">오류</div>
       </div>
-      <div
-        class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center"
-      >
+      <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 text-center">
         <div class="text-2xl font-bold text-yellow-400">
           {statusSummary.warnings}
         </div>
@@ -241,114 +262,110 @@
     <!-- 각 제공업체별 상세 상태 -->
     <div class="space-y-4">
       {#each Object.entries(validationResult.provider_status || {}) as [providerKey, status]}
-        {@const providerName = formatProviderName(providerKey)}
-        {@const providerStatus = getProviderStatus(status)}
+        {#snippet providerDetails(providerKey: string, status: ProviderStatus)}
+          {@const providerName = formatProviderName(providerKey)}
+          {@const providerStatus = getProviderStatus(status)}
 
-        <div class="border border-dark-700 rounded-lg overflow-hidden">
-          <!-- 제공업체 헤더 -->
-          <div class="bg-dark-800/50 p-4 border-b border-dark-700">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <StatusIndicator
-                  status={providerStatus.icon}
-                  message=""
-                  variant="badge"
-                  size="sm"
-                />
-                <div>
-                  <h3 class="font-semibold text-dark-100">{providerName}</h3>
-                  <p class="text-sm {providerStatus.color}">
-                    {providerStatus.text}
-                  </p>
+          <div class="border border-dark-700 rounded-lg overflow-hidden">
+            <!-- 제공업체 헤더 -->
+            <div class="bg-dark-800/50 p-4 border-b border-dark-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <StatusIndicator
+                    status={providerStatus.icon}
+                    message=""
+                    variant="badge"
+                    size="sm"
+                  />
+                  <div>
+                    <h3 class="font-semibold text-dark-100">{providerName}</h3>
+                    <p class="text-sm {providerStatus.color}">
+                      {providerStatus.text}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <!-- 연결 테스트 버튼 -->
-              {#if showTestButtons && status.has_api_key && status.interface_initialized}
-                <button
-                  class="btn-ghost text-xs px-3 py-1 {testingStates[providerKey]
-                    ? 'animate-pulse'
-                    : ''}"
-                  on:click={() => testApiConnection(providerKey)}
-                  disabled={testingStates[providerKey]}
-                >
-                  {#if testingStates[providerKey]}
-                    <LoadingSpinner text="" size="sm" />
-                  {:else}
-                    <TestTube size={14} class="mr-1" />
-                  {/if}
-                  연결 테스트
-                </button>
-              {/if}
+                <!-- 연결 테스트 버튼 -->
+                {#if showTestButtons && status.has_api_key && status.interface_initialized}
+                  <button
+                    class="btn-ghost text-xs px-3 py-1 {testingStates[providerKey] ? 'animate-pulse' : ''}"
+                    onclick={() => testApiConnection(providerKey)}
+                    disabled={testingStates[providerKey]}
+                  >
+                    {#if testingStates[providerKey]}
+                      <LoadingSpinner text="" size="sm" />
+                    {:else}
+                      <TestTube size={14} class="mr-1" />
+                    {/if}
+                    연결 테스트
+                  </button>
+                {/if}
+              </div>
             </div>
+
+            <!-- 상세 정보 -->
+            {#if showDetails}
+              <div class="p-4 space-y-3">
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                  <!-- 기본 상태 -->
+                  <div>
+                    <h4 class="font-medium text-dark-200 mb-2">기본 상태</h4>
+                    <div class="space-y-1">
+                      <div class="flex justify-between">
+                        <span class="text-dark-400">API 키:</span>
+                        <StatusIndicator
+                          status={status.has_api_key ? "success" : "error"}
+                          message={status.has_api_key ? "설정됨" : "미설정"}
+                          variant="badge"
+                          size="sm"
+                        />
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-dark-400">인터페이스:</span>
+                        <StatusIndicator
+                          status={status.interface_initialized ? "success" : "error"}
+                          message={status.interface_initialized ? "초기화됨" : "오류"}
+                          variant="badge"
+                          size="sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 모델 정보 -->
+                  <div>
+                    <h4 class="font-medium text-dark-200 mb-2">모델 정보</h4>
+                    <div class="space-y-1">
+                      <div class="flex justify-between">
+                        <span class="text-dark-400">사용 가능한 모델:</span>
+                        <span class="text-dark-200 font-medium">{status.available_models}개</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 지원 기능 -->
+                {#if status.interface_initialized && status.supported_features}
+                  <div>
+                    <h4 class="font-medium text-dark-200 mb-2">지원 기능</h4>
+                    <div class="flex flex-wrap gap-2">
+                      {#each Object.entries(status.supported_features) as [feature, supported]}
+                        <StatusIndicator
+                          status={supported ? "success" : "error"}
+                          message={feature}
+                          variant="badge"
+                          size="sm"
+                        />
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            {/if}
           </div>
+        {/snippet}
 
-          <!-- 상세 정보 -->
-          {#if showDetails}
-            <div class="p-4 space-y-3">
-              <div class="grid grid-cols-2 gap-4 text-sm">
-                <!-- 기본 상태 -->
-                <div>
-                  <h4 class="font-medium text-dark-200 mb-2">기본 상태</h4>
-                  <div class="space-y-1">
-                    <div class="flex justify-between">
-                      <span class="text-dark-400">API 키:</span>
-                      <StatusIndicator
-                        status={status.has_api_key ? "success" : "error"}
-                        message={status.has_api_key ? "설정됨" : "미설정"}
-                        variant="badge"
-                        size="sm"
-                      />
-                    </div>
-                    <div class="flex justify-between">
-                      <span class="text-dark-400">인터페이스:</span>
-                      <StatusIndicator
-                        status={status.interface_initialized
-                          ? "success"
-                          : "error"}
-                        message={status.interface_initialized
-                          ? "초기화됨"
-                          : "오류"}
-                        variant="badge"
-                        size="sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 모델 정보 -->
-                <div>
-                  <h4 class="font-medium text-dark-200 mb-2">모델 정보</h4>
-                  <div class="space-y-1">
-                    <div class="flex justify-between">
-                      <span class="text-dark-400">사용 가능한 모델:</span>
-                      <span class="text-dark-200 font-medium"
-                        >{status.available_models}개</span
-                      >
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 지원 기능 -->
-              {#if status.interface_initialized && status.supported_features}
-                <div>
-                  <h4 class="font-medium text-dark-200 mb-2">지원 기능</h4>
-                  <div class="flex flex-wrap gap-2">
-                    {#each Object.entries(status.supported_features) as [feature, supported]}
-                      <StatusIndicator
-                        status={supported ? "success" : "error"}
-                        message={feature}
-                        variant="badge"
-                        size="sm"
-                      />
-                    {/each}
-                  </div>
-                </div>
-              {/if}
-            </div>
-          {/if}
-        </div>
+        {@render providerDetails(providerKey, status as ProviderStatus)}
       {/each}
     </div>
   {/if}
