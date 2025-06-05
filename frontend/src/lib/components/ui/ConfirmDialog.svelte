@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/ConfirmDialog.svelte -->
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { AlertTriangle, CheckCircle, XCircle, Info } from "lucide-svelte";

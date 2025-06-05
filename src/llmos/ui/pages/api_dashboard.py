@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/api_dashboard.py
 # src/llmos/ui/pages/api_dashboard.py
 """
 LLM OS - API 대시보드 페이지
@@ -10,7 +11,6 @@ import streamlit as st
 from ...managers.settings import SettingsManager
 from ...managers.model_manager import EnhancedModelManager
 from ...managers.usage_tracker import UsageTracker
-from ...ui.components import EnhancedUI
 
 logger = logging.getLogger(__name__)
 

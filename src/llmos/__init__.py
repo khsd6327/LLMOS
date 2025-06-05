@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/__init__.py
 # src/llmos/__init__.py
 """
 LLM OS - 개인 맞춤형 AI 비서 시스템
@@ -11,7 +12,6 @@ __author__ = "LLM OS Team"
 __description__ = "개인 맞춤형 AI 비서 시스템"
 
 # 주요 클래스들 노출
-from .core.app import EnhancedLLMOSApp, create_app, run_app
 from .managers.settings import SettingsManager
 from .managers.chat_sessions import ChatSessionManager
 from .managers.usage_tracker import UsageTracker

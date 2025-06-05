@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/ChatInput.svelte -->
 <script lang="ts">
   import {
     currentSession,

@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/TypingIndicator.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
 

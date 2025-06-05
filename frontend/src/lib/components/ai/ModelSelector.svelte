@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ai/ModelSelector.svelte -->
 <script lang="ts">
   import {
     selectedProvider,

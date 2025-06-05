@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/pages/UsagePage.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { usageStats } from "$lib/stores";

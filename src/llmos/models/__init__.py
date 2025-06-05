@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/models/__init__.py
 # src/llmos/models/__init__.py
 """
 LLM OS 데이터 모델

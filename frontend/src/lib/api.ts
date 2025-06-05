@@ -1,3 +1,4 @@
+// ted-os-project/frontend/src/lib/api.ts
 // API 클라이언트 - FastAPI 백엔드와 통신
 const API_BASE = '/api';
 

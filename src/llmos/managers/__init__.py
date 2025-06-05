@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/managers/__init__.py
 # src/llmos/managers/__init__.py
 """
 LLM OS 관리자 클래스들

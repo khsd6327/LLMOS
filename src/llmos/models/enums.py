@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/models/enums.py
 # src/llmos/models/enums.py
 """
 LLM OS - Enum 클래스 정의

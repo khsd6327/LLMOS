@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/managers/model_management/response_manager.py
 # src/llmos/managers/model_management/response_manager.py
 """
 LLM OS - AI 응답 생성 관리자

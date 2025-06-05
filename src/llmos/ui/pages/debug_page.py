@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/debug_page.py
 # src/llmos/ui/pages/debug_page.py
 """
 LLM OS - 디버그 페이지 (리팩토링됨)
@@ -11,7 +12,6 @@ from ...managers.settings import SettingsManager
 from ...managers.chat_sessions import ChatSessionManager
 from ...managers.model_manager import EnhancedModelManager
 from ...managers.usage_tracker import UsageTracker
-from ...ui.components import EnhancedUI
 from ...managers.favorite_manager import FavoriteManager
 from .debug.system_info import SystemInfoRenderer
 from .debug.logs_viewer import LogsViewer

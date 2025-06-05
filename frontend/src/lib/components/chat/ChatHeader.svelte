@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/ChatHeader.svelte -->
 <script lang="ts">
   import { currentSession, sidebarOpen, isGenerating } from "$lib/stores";
   import { api } from "$lib/api";

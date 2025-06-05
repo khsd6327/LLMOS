@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ai/UsageTrends.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { api } from "$lib/api";

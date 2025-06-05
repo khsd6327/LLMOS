@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ai/SessionUsageStats.svelte -->
 <script lang="ts">
   import { usageStats, sessionDuration } from "$lib/stores";
   import { formatCost, formatTokens } from "$lib/models";

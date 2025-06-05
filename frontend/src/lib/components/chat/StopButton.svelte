@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/StopButton.svelte -->
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { StopCircle, Brain, Loader2 } from "lucide-svelte";

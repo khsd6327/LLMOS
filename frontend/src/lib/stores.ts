@@ -1,3 +1,4 @@
+// ted-os-project/frontend/src/lib/stores.ts
 // Svelte stores for state management
 import { writable, readable, derived } from 'svelte/store';
 import type { ChatSession, ChatMessage, UsageStats, FavoriteMessage } from './api';

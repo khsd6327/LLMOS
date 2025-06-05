@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/debug/logs_viewer.py
 # src/llmos/ui/pages/debug/logs_viewer.py
 """
 LLM OS - 로그 관리 및 표시 담당 모듈

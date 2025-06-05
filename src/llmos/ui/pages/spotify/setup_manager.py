@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/spotify/setup_manager.py
 # src/llmos/ui/pages/spotify/setup_manager.py
 """
 LLM OS - Spotify 설정 및 인증 관리자

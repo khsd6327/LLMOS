@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/ErrorToast.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { clearError } from "$lib/stores";

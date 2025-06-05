@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/utils/output_renderer.py
 # src/llmos/utils/output_renderer.py
 """
 LLM OS - 출력 렌더러

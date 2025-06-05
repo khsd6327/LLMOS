@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/interfaces/spotify_client.py
 # src/llmos/interfaces/spotify_client.py
 """
 Spotify API 클라이언트

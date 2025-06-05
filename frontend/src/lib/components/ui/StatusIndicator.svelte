@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/StatusIndicator.svelte -->
 <script lang="ts">
   import {
     CheckCircle,

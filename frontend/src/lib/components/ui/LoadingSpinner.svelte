@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/LoadingSpinner.svelte -->
 <script lang="ts">
   import { Loader2, Brain, Zap, Circle } from "lucide-svelte";
 

@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/ProgressBar.svelte -->
 <script lang="ts">
   export let progress: number = 0; // 0-100 사이의 값
   export let text: string = "";

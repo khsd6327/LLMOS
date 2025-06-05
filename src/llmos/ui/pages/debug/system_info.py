@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/debug/system_info.py
 # src/llmos/ui/pages/debug/system_info.py
 """
 LLM OS - 시스템 정보 렌더링 담당 모듈

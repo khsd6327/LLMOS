@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/ChatPage.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import {

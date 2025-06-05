@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/WelcomeScreen.svelte -->
 <script lang="ts">
   import { selectedProvider, selectedModel, sessions } from "$lib/stores";
   import { getModelConfig } from "$lib/models";

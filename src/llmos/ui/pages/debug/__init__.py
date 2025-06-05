@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/debug/__init__.py
 # src/llmos/ui/pages/debug/__init__.py
 """
 LLM OS - 디버그 페이지 모듈

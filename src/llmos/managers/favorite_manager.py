@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/managers/favorite_manager.py
 # src/llmos/managers/favorite_manager.py
 import json
 import logging

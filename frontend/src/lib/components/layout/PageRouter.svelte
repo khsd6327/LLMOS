@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/layout/PageRouter.svelte -->
 <script lang="ts">
   import { currentPage } from "$lib/stores";
   import ChatPage from "../chat/ChatPage.svelte";

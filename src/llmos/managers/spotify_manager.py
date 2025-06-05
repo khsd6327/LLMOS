@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/managers/spotify_manager.py
 # src/llmos/managers/spotify_manager.py
 """
 Spotify 관리 매니저

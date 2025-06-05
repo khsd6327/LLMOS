@@ -1,3 +1,4 @@
+// ted-os-project/frontend/src/lib/utils.ts
 // 유틸리티 함수들
 
 // 날짜 포맷팅

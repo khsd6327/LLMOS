@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/spotify/playlist_manager.py
 # src/llmos/ui/pages/spotify/playlist_manager.py
 """
 LLM OS - Spotify 플레이리스트 관리 담당 모듈

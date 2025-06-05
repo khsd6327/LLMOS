@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/core/config.py
 # src/llmos/core/config.py
 """
 LLM OS - 전역 설정 및 상수 정의

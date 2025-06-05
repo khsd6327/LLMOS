@@ -1,3 +1,4 @@
+// ted-os-project/frontend/src/lib/index.ts
 // 중앙 export 파일 - $lib alias로 import 가능한 모든 모듈들
 
 // API 클라이언트

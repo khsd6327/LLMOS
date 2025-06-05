@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/pages/FavoritesPage.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { favorites, searchQuery, selectedTags } from "$lib/stores";

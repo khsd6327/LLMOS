@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/MessageList.svelte -->
 <script lang="ts">
   import { onMount, afterUpdate } from "svelte";
   import type { ChatSession } from "$lib/api";

@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/interfaces/google_client.py
 # src/llmos/interfaces/google_client.py
 """
 LLM OS - Google 인터페이스

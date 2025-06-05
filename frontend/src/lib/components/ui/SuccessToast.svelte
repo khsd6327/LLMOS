@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/ui/SuccessToast.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { clearSuccess } from "$lib/stores";

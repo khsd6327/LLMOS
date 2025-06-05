@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/interfaces/openai_client.py
 # src/llmos/interfaces/openai_client.py
 """
 LLM OS - OpenAI 인터페이스

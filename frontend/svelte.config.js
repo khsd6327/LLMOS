@@ -1,3 +1,4 @@
+// ted-os-project/frontend/svelte.config.js
 import adapter from '@sveltejs/adapter-auto';
 import { vitePreprocess } from '@sveltejs/kit/vite';
 

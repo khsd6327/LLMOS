@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/spotify_page.py
 # src/llmos/ui/pages/spotify_page.py
 """
 LLM OS - Spotify 페이지 (리팩토링됨)
@@ -7,8 +8,6 @@ import streamlit as st
 import logging
 
 from ...managers.spotify_manager import SpotifyManager
-from ...ui.components import EnhancedUI
-from ...ui.styles import apply_theme
 from .spotify import SetupManager, TrackOrganizer, PlaylistManager, MaintenanceTools
 
 logger = logging.getLogger(__name__)

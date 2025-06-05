@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/routes/+page.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { currentSession, currentSessionId, sessions } from "$lib/stores";

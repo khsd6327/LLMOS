@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/interfaces/base.py
 # src/llmos/interfaces/base.py
 """
 LLM OS - 기본 인터페이스 추상 클래스

@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/settings.py
 # src/llmos/ui/pages/settings.py
 """
 LLM OS - 설정 페이지
@@ -12,7 +13,6 @@ from ...managers.spotify_manager import SpotifyManager
 from ...managers.settings import SettingsManager
 from ...managers.model_manager import EnhancedModelManager
 from ...models.enums import ModelProvider
-from ...ui.components import EnhancedUI
 
 logger = logging.getLogger(__name__)
 

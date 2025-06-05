@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/managers/model_manager.py
 # src/llmos/managers/model_manager.py
 """
 LLM OS - 모델 관리자 (리팩토링됨)

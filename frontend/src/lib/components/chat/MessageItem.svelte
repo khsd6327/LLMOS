@@ -1,3 +1,4 @@
+<!-- ted-os-project/frontend/src/lib/components/chat/MessageItem.svelte -->
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import {

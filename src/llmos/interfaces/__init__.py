@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/interfaces/__init__.py
 # src/llmos/interfaces/__init__.py
 """
 LLM OS AI 인터페이스

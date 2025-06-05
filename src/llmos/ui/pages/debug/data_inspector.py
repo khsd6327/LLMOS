@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/ui/pages/debug/data_inspector.py
 # src/llmos/ui/pages/debug/data_inspector.py
 """
 LLM OS - 데이터 검사 담당 모듈 (세션, 즐겨찾기, 성능)

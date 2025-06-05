@@ -1,3 +1,4 @@
+# ted-os-project/src/llmos/models/model_registry.py
 # src/llmos/models/model_registry.py
 """
 LLM OS - 모델 레지스트리
