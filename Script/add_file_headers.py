@@ -1,4 +1,4 @@
-# LLM_OS_Project/scripts/add_file_headers.py
+# ted-os-project/Script/add_file_headers.py
 import os
 import subprocess
 import sys
