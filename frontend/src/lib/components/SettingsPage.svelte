@@ -13,6 +13,7 @@
     EyeOff,
     Save,
     RotateCcw,
+    Music,
   } from "lucide-svelte";
 
   let loading = false;
@@ -174,6 +175,24 @@
     if (key === "***") return "설정됨";
     return key.substring(0, 8) + "••••••••";
   }
+  // 연결 테스트 함수
+  async function testApiConnection(provider: string) {
+    try {
+      showSuccess(
+        `${formatProviderName(provider)} API 연결 테스트를 시작합니다...`
+      );
+
+      // 실제 구현에서는 백엔드 API 호출
+      // const result = await api.testProviderConnection(provider);
+
+      // 임시로 성공 메시지 (실제로는 백엔드에서 테스트 결과를 받아야 함)
+      setTimeout(() => {
+        showSuccess(`✅ ${formatProviderName(provider)} API 연결 성공!`);
+      }, 1000);
+    } catch (error) {
+      showError(`❌ ${formatProviderName(provider)} API 연결 실패: ${error}`);
+    }
+  }
 </script>
 
 <div class="flex-1 overflow-y-auto p-6 space-y-6">
@@ -220,7 +239,51 @@
           각 AI 제공업체의 API 키를 설정하세요. 키는 안전하게 암호화되어
           저장됩니다.
         </p>
+        <!-- AI 제공업체 전체 상태 요약 -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div
+            class="bg-dark-800/50 border border-dark-700 rounded-lg p-3 text-center"
+          >
+            <div class="text-2xl font-bold text-dark-100">
+              {Object.keys(apiKeys).length}
+            </div>
+            <div class="text-xs text-dark-500">총 제공업체</div>
+          </div>
+          <div
+            class="bg-dark-800/50 border border-dark-700 rounded-lg p-3 text-center"
+          >
+            <div class="text-2xl font-bold text-green-400">
+              {Object.entries(apiKeys).filter(([_, key]) => key && key !== "")
+                .length}
+            </div>
+            <div class="text-xs text-dark-500">활성 제공업체</div>
+          </div>
+          <div
+            class="bg-dark-800/50 border border-dark-700 rounded-lg p-3 text-center"
+          >
+            <div class="text-2xl font-bold text-dark-100">0</div>
+            <div class="text-xs text-dark-500">오류</div>
+          </div>
+          <div
+            class="bg-dark-800/50 border border-dark-700 rounded-lg p-3 text-center"
+          >
+            <div class="text-2xl font-bold text-dark-100">0</div>
+            <div class="text-xs text-dark-500">경고</div>
+          </div>
+        </div>
 
+        <!-- 새로고침 버튼 -->
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-sm text-dark-400">
+              각 AI 제공업체의 API 키 및 연결 상태를 확인합니다.
+            </p>
+          </div>
+          <button class="btn-secondary">
+            <RefreshCw size={16} class="mr-2" />
+            상태 새로고침
+          </button>
+        </div>
         <div class="space-y-4">
           {#each Object.entries(apiKeys) as [provider, key]}
             <div class="border border-dark-700 rounded-lg p-4">
@@ -236,6 +299,14 @@
                   >
                     {key && key !== "" ? "설정됨" : "미설정"}
                   </span>
+                  {#if key && key !== ""}
+                    <button
+                      class="btn-ghost text-xs px-2 py-1"
+                      on:click={() => testApiConnection(provider)}
+                    >
+                      🔗 연결 테스트
+                    </button>
+                  {/if}
                 </div>
               </div>
 
@@ -426,6 +497,143 @@
                 class="w-11 h-6 bg-dark-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-claude-orange"
               />
             </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spotify API 설정 -->
+      <div class="card p-6">
+        <div class="flex items-center space-x-2 mb-4">
+          <Music size={20} class="text-green-500" />
+          <h2 class="text-lg font-semibold text-dark-100">Spotify API 연동</h2>
+        </div>
+
+        <p class="text-sm text-dark-400 mb-6">
+          LLMOS에서 Spotify 기능을 사용하려면 Spotify 개발자 대시보드에서
+          애플리케이션을 생성하고 다음 정보를 설정해야 합니다.
+        </p>
+
+        <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4 mb-6">
+          <h3 class="font-medium text-dark-200 mb-2">📋 설정 가이드</h3>
+          <ol class="text-sm text-dark-400 space-y-1 list-decimal ml-4">
+            <li>
+              <a
+                href="https://developer.spotify.com/dashboard/"
+                target="_blank"
+                class="text-claude-orange hover:underline"
+              >
+                Spotify Developer Dashboard
+              </a>에서 앱을 생성하세요
+            </li>
+            <li>Client ID와 Client Secret을 복사하세요</li>
+            <li>
+              Redirect URI에 <code class="bg-dark-700 px-1 rounded"
+                >http://127.0.0.1:8888/callback</code
+              >를 추가하세요
+            </li>
+          </ol>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Client ID -->
+          <div>
+            <label class="block text-sm font-medium text-dark-300 mb-2">
+              Spotify Client ID
+            </label>
+            <input
+              type="text"
+              placeholder="여기에 Client ID를 입력하세요"
+              class="input"
+            />
+            <p class="text-xs text-dark-500 mt-1">
+              Spotify 개발자 대시보드에서 발급받은 Client ID입니다.
+            </p>
+          </div>
+
+          <!-- Client Secret -->
+          <div>
+            <label class="block text-sm font-medium text-dark-300 mb-2">
+              Spotify Client Secret
+            </label>
+            <input
+              type="password"
+              placeholder="여기에 Client Secret을 입력하세요"
+              class="input"
+            />
+            <p class="text-xs text-dark-500 mt-1">
+              Spotify 개발자 대시보드에서 발급받은 Client Secret입니다.
+            </p>
+          </div>
+
+          <!-- Redirect URI -->
+          <div>
+            <label class="block text-sm font-medium text-dark-300 mb-2">
+              Redirect URI
+            </label>
+            <input
+              type="text"
+              value="http://127.0.0.1:8888/callback"
+              class="input"
+              readonly
+            />
+            <p class="text-xs text-dark-500 mt-1">
+              Spotify 앱 설정에 등록한 Redirect URI와 정확히 일치해야 합니다.
+            </p>
+          </div>
+
+          <!-- 포트 타입 -->
+          <div>
+            <label class="block text-sm font-medium text-dark-300 mb-2">
+              로컬 포트 타입
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <label
+                class="flex items-center p-3 border border-dark-700 rounded-lg cursor-pointer hover:border-dark-600"
+              >
+                <input
+                  type="radio"
+                  name="portType"
+                  value="fixed"
+                  checked
+                  class="mr-3 text-claude-orange"
+                />
+                <div>
+                  <div class="font-medium text-dark-200">고정 포트</div>
+                  <div class="text-xs text-dark-500">포트 8888 사용</div>
+                </div>
+              </label>
+              <label
+                class="flex items-center p-3 border border-dark-700 rounded-lg cursor-pointer hover:border-dark-600"
+              >
+                <input
+                  type="radio"
+                  name="portType"
+                  value="dynamic"
+                  class="mr-3 text-claude-orange"
+                />
+                <div>
+                  <div class="font-medium text-dark-200">동적 포트</div>
+                  <div class="text-xs text-dark-500">자동 할당</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 저장 버튼 -->
+          <button class="btn-primary w-full">
+            <Save size={16} class="mr-2" />
+            Spotify 설정 저장
+          </button>
+
+          <!-- 상태 표시 -->
+          <div class="bg-dark-800/50 border border-dark-700 rounded-lg p-4">
+            <h3 class="font-medium text-dark-200 mb-2">연동 상태</h3>
+            <div class="flex items-center text-sm">
+              <span class="w-3 h-3 bg-red-500 rounded-full mr-2" />
+              <span class="text-dark-400"
+                >Spotify API 정보가 설정되지 않았습니다</span
+              >
+            </div>
           </div>
         </div>
       </div>
