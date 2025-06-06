@@ -18,16 +18,16 @@ export const MODELS_DATA: ModelsData = {
         "input_cost_per_1k": 0.00015,
         "output_cost_per_1k": 0.0006
       },
-      "gemini-2.5-pro-preview-05-06": {
+      "gemini-2.5-pro-preview-06-05": {
         "provider": "GOOGLE",
-        "model_name": "gemini-2.5-pro-preview-05-06",
+        "model_name": "gemini-2.5-pro-preview-06-05",
         "display_name": "Gemini 2.5 Pro Preview",
         "max_tokens": 65536,
         "supports_streaming": true,
         "supports_functions": true,
         "supports_vision": true,
         "description": "Our state-of-the-art thinking model, capable of reasoning over complex problems in code, math, and STEM. Supports large document analysis.",
-        "input_cost_per_1k": 0.00125,
+        "input_cost_per_1k": 0.0025,
         "output_cost_per_1k": 0.01
       }
     }

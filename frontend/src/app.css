@@ -6,7 +6,7 @@
 /* 전역 기본 스타일 */
 @layer base {
   body {
-    @apply bg-dark-950 text-dark-50 font-sans antialiased;
+    @apply bg-white text-gray-900 font-sans antialiased;
   }
 }
 
