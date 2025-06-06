@@ -153,14 +153,11 @@ class ResponseManager:
                             ) * config.output_cost_per_1k
                             final_usage_data.cost_usd = round(input_cost + output_cost, 6)
                             self.usage_tracker.add_usage(final_usage_data)
-                    elif (
-                        isinstance(chunk_data, str) and chunk_data.strip()
-                    ):  # ← 빈 문자열 체크 추가
-                        # 텍스트 청크
-                        accumulated_response += chunk_data
-                        yield self.output_renderer.process_output(
-                            accumulated_response
-                        ), final_usage_data
+                    elif isinstance(chunk_data, str):
+                        # 새로운 청크만 yield (누적하지 않음)
+                        if chunk_data:  # 빈 문자열이 아닌 경우만
+                            accumulated_response += chunk_data
+                            yield self.output_renderer.process_output(chunk_data), final_usage_data
                     elif chunk_data is None:
                         # None 값은 무시하고 계속 진행
                         continue
