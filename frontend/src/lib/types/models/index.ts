@@ -1,4 +1,4 @@
-// ted-os-project/frontend/src/lib/models.ts
+// ted-os-project/frontend/src/lib/types/models/index.ts
 // 모델 설정 데이터 (제공된 models.json 기반)
 import type { ModelsData, ModelConfig } from './api';
 

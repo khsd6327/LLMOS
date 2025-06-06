@@ -3,9 +3,9 @@ name: Basic Check
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   basic-check:
@@ -18,7 +18,7 @@ jobs:
       - name: Python 설정
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: 패키지 설치
         run: |
@@ -27,7 +27,7 @@ jobs:
 
       - name: 기본 문법 체크
         run: |
-          python -m py_compile src/llmos/core/app.py
+          python -m py_compile src/tedos/core/app.py
           echo "✅ 기본 문법 체크 완료!"
 
       - name: 성공 메시지

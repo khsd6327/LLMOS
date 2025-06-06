@@ -1,7 +1,6 @@
 # ted-os-project/backend/main.py
-# backend/main.py
 """
-LLM OS - Backend API Server (FastAPI)
+Ted OS - Backend API Server (FastAPI)
 """
 
 import sys
@@ -16,16 +15,16 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 # ------------------------------
 
-# --- 기존 LLM OS 매니저들 임포트 ---
-from src.llmos.managers.settings import SettingsManager
-from src.llmos.managers.chat_sessions import ChatSessionManager
-from src.llmos.managers.model_manager import EnhancedModelManager
-from src.llmos.managers.usage_tracker import UsageTracker
-from src.llmos.models.data_models import ChatSession, FavoriteMessage
-from src.llmos.models.enums import ModelProvider
-from src.llmos.managers.favorite_manager import FavoriteManager
-from src.llmos.managers.spotify_manager import SpotifyManager
-from src.llmos.models.model_registry import ModelRegistry
+# --- 기존 Ted OS 매니저들 임포트 ---
+from src.tedos.managers.settings import SettingsManager
+from src.tedos.managers.chat_sessions import ChatSessionManager
+from src.tedos.managers.model_manager import EnhancedModelManager
+from src.tedos.managers.usage_tracker import UsageTracker
+from src.tedos.models.data_models import ChatSession, FavoriteMessage
+from src.tedos.models.enums import ModelProvider
+from src.tedos.managers.favorite_manager import FavoriteManager
+from src.tedos.managers.spotify_manager import SpotifyManager
+from src.tedos.models.model_registry import ModelRegistry
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
@@ -83,8 +82,8 @@ job_manager = JobManager()
 
 # --- FastAPI 애플리케이션 생성 ---
 app = FastAPI(
-    title="LLM OS Backend API",
-    description="LLM OS의 비즈니스 로직을 제공하는 API 서버",
+    title="Ted OS Backend API",
+    description="Ted OS의 비즈니스 로직을 제공하는 API 서버",
     version="0.1.0",
 )
 # CORS 설정 추가
@@ -230,7 +229,7 @@ class SyncStatusResponse(BaseModel):
 @app.get("/")
 def read_root():
     """헬스 체크 엔드포인트"""
-    return {"message": "LLM OS Backend is running"}
+    return {"message": "Ted OS Backend is running"}
 
 @app.get("/api/sessions", response_model=list[ChatSession])
 def get_chat_sessions(context: AppContext = Depends(get_app_context)):

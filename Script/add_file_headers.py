@@ -35,29 +35,45 @@ def add_header_to_file(file_path_relative, project_root_abs, comment_start, comm
         
         # 주석 라인 생성
         if comment_end: # 블록 주석 (예: /* ... */, )
-            header_comment_line = f"{comment_start} {header_path} {comment_end}"
+            expected_header = f"{comment_start} {header_path} {comment_end}"
         else: # 한 줄 주석 (예: # ..., // ...)
-            header_comment_line = f"{comment_start} {header_path}"
+            expected_header = f"{comment_start} {header_path}"
 
         with open(abs_file_path, 'r+', encoding='utf-8') as f:
             lines = f.readlines()
             
-            header_exists = False
-            if lines: # 파일이 비어있지 않은 경우
-                # 첫 줄에 이미 해당 접두사로 시작하는 헤더가 있는지 확인
-                if lines[0].strip().startswith(f"{comment_start} {project_name}/"):
-                    header_exists = True
+            should_add_header = True
+            start_index = 0  # 내용을 시작할 인덱스
             
-            if not header_exists:
-                new_lines = [header_comment_line + '\n']
-                new_lines.extend(lines)
+            if lines: # 파일이 비어있지 않은 경우
+                first_line = lines[0].strip()
+                
+                # 첫 줄이 정확한 헤더인지 확인
+                if first_line == expected_header:
+                    should_add_header = False
+                    print(f"올바른 헤더 이미 존재: {file_path_relative}")
+                # 첫 줄이 프로젝트 헤더 형식이지만 틀린 경우 (경로가 다르거나 형식이 다른 경우)
+                elif first_line.startswith(f"{comment_start} {project_name}/"):
+                    # 기존 헤더를 제거하고 새로운 헤더로 교체
+                    start_index = 1
+                    print(f"틀린 헤더 교체: {file_path_relative}")
+                    print(f"  기존: {first_line}")
+                    print(f"  새로운: {expected_header}")
+                else:
+                    # 헤더가 없는 경우
+                    print(f"헤더 추가: {file_path_relative}")
+            else:
+                # 빈 파일인 경우
+                print(f"빈 파일에 헤더 추가: {file_path_relative}")
+            
+            if should_add_header:
+                # 새로운 헤더와 기존 내용(틀린 헤더 제외) 결합
+                new_lines = [expected_header + '\n']
+                new_lines.extend(lines[start_index:])
                 
                 f.seek(0)
                 f.writelines(new_lines)
                 f.truncate()
-                print(f"헤더 추가 완료: {file_path_relative}")
-            else:
-                print(f"헤더 이미 존재: {file_path_relative}")
 
     except FileNotFoundError:
         print(f"오류: 파일을 찾을 수 없습니다 - {file_path_relative}", file=sys.stderr)
@@ -89,6 +105,7 @@ def main():
         "주의: 이 스크립트는 Git이 추적하는 파일들 중 다음 확장자를 가진 파일에\n"
         f"헤더 주석을 추가하려고 시도합니다: {supported_extensions_str}\n"
         "JSON 파일과 같이 주석을 지원하지 않거나 위 목록에 없는 다른 확장자 파일은 건너뜁니다.\n"
+        "틀린 헤더가 있는 경우 올바른 헤더로 교체됩니다.\n"
         "스크립트 실행 전에 현재 변경사항을 모두 커밋했는지 확인하세요.\n"
         "계속 진행하시겠습니까? (yes/no): "
     )
