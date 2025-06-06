@@ -1,6 +1,3 @@
-# ted-os-project/src/tedos/__init__.py
-<<<<<<< HEAD
-# ted-os-project/src/tedos/__init__.py
 # src/tedos/__init__.py
 """
 Ted OS - 개인 맞춤형 AI 비서 시스템
@@ -13,8 +10,6 @@ __title__ = APP_NAME
 __author__ = "Ted OS Team"
 __description__ = "개인 맞춤형 AI 비서 시스템"
 
-=======
->>>>>>> fix/remove-app-imports
 # 주요 클래스들 노출
 from .managers.settings import SettingsManager
 from .managers.chat_sessions import ChatSessionManager
