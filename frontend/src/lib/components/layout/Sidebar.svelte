@@ -404,3 +404,26 @@
     <Menu size={20} />
   </button>
 {/if}
+<!-- 기존 설정 버튼 -->
+<button
+  class="w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors
+    {$currentPage === 'settings'
+    ? 'bg-dark-700 text-dark-100'
+    : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800'}"
+  on:click={() => currentPage.set("settings")}
+>
+  <Settings size={16} class="mr-3" />
+  설정
+</button>
+
+<!-- 추가할 Spotify 메뉴 버튼 -->
+<button
+  class="w-full flex items-center px-3 py-2 text-sm rounded-lg transition-colors
+    {$currentPage === 'spotify'
+    ? 'bg-dark-700 text-dark-100'
+    : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800'}"
+  on:click={() => currentPage.set("spotify")}
+>
+  🎵
+  <span class="ml-3">Spotify</span>
+</button>

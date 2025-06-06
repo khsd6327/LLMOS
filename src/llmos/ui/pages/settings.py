@@ -25,12 +25,10 @@ class SettingsPage:
         settings_manager: SettingsManager,
         model_manager: EnhancedModelManager,
         spotify_manager: SpotifyManager, # <--- spotify_manager 인자 추가
-        ui: EnhancedUI,
     ):
         self.settings = settings_manager
         self.model_manager = model_manager
         self.spotify_manager = spotify_manager # <--- self.spotify_manager로 저장
-        self.ui = ui
         
     def render(self):
         """설정 페이지 렌더링"""

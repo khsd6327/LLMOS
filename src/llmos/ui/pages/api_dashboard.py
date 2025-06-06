@@ -23,12 +23,10 @@ class APIDashboardPage:
         settings_manager: SettingsManager,
         model_manager: EnhancedModelManager,
         usage_tracker: UsageTracker,
-        ui: EnhancedUI,
     ):
         self.settings = settings_manager
         self.model_manager = model_manager
         self.usage_tracker = usage_tracker
-        self.ui = ui
 
     def render(self):
         """API 대시보드 페이지 렌더링"""

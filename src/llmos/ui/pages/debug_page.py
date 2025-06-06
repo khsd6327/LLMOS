@@ -31,8 +31,7 @@ class DebugPage:
         model_manager: EnhancedModelManager,
         usage_tracker: UsageTracker,
         favorite_manager: FavoriteManager,
-        ui: EnhancedUI,
-    ):
+        ):
         self.settings = settings_manager
         self.chat_manager = chat_manager
         self.model_manager = model_manager

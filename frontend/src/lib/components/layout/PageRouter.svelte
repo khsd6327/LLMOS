@@ -4,6 +4,7 @@
   import ChatPage from "../chat/ChatPage.svelte";
   import FavoritesPage from "../pages/FavoritesPage.svelte";
   import UsagePage from "../pages/UsagePage.svelte";
+  import SpotifyPage from "../pages/SpotifyPage.svelte";
   import SettingsPage from "../pages/SettingsPage.svelte";
   import { fade, slide } from "svelte/transition";
 
@@ -47,6 +48,14 @@
       class="flex-1 flex flex-col overflow-hidden"
     >
       <SettingsPage />
+    </div>
+  {:else if $currentPage === "spotify"}
+    <div
+      in:fade={transitionOptions}
+      out:fade={{ duration: 100 }}
+      class="flex-1 flex flex-col overflow-hidden"
+    >
+      <SpotifyPage />
     </div>
   {:else}
     <!-- 기본 페이지 (채팅) -->

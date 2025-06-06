@@ -22,13 +22,44 @@ export const maxTokens = writable<number>(4096);
 // UI 상태
 export const sidebarOpen = writable<boolean>(true);
 export const settingsOpen = writable<boolean>(false);
-export const currentPage = writable<'chat' | 'favorites' | 'settings' | 'usage'>('chat');
+export const currentPage = writable<'chat' | 'favorites' | 'settings' | 'usage' | 'spotify'>('chat');
 
 // 사용량 통계
 export const usageStats = writable<UsageStats | null>(null);
 
 // 즐겨찾기
 export const favorites = writable<FavoriteMessage[]>([]);
+
+// Spotify 상태 관리
+export const spotifyStatus = writable<{
+  is_configured: boolean;
+  is_authenticated: boolean;
+  user_id?: string;
+} | null>(null);
+
+export const spotifyPlaylists = writable<any[]>([]);
+export const spotifyLikedTracks = writable<any[]>([]);
+export const spotifyLoading = writable<boolean>(false);
+export const spotifySyncProgress = writable<{
+  job_id?: string;
+  status?: string;
+  progress?: number;
+  current_step?: string;
+  error_message?: string;
+} | null>(null);
+
+// Spotify 설정 상태
+export const spotifySetupForm = writable<{
+  client_id: string;
+  client_secret: string;
+  redirect_uri: string;
+  port_type: string;
+}>({
+  client_id: '',
+  client_secret: '',
+  redirect_uri: 'http://127.0.0.1:8888/callback',
+  port_type: 'fixed'
+});
 
 // 검색 및 필터
 export const searchQuery = writable<string>('');
