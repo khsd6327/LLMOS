@@ -27,7 +27,7 @@ jobs:
 
       - name: 기본 문법 체크
         run: |
-          python -m py_compile src/tedos/core/app.py
+          python -m py_compile backend/core/app.py
           echo "✅ 기본 문법 체크 완료!"
 
       - name: 성공 메시지

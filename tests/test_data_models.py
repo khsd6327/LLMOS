@@ -4,14 +4,15 @@ import types
 from pathlib import Path
 import importlib
 
-# Set up minimal package structure to load data_models without executing tedos.__init__
-package_path = Path(__file__).resolve().parents[1] / "src/tedos"
-package = types.ModuleType("tedos")
+# Import the data models from the backend package without executing
+# the full package initialisation logic.
+package_path = Path(__file__).resolve().parents[1] / "backend"
+package = types.ModuleType("backend")
 package.__path__ = [str(package_path)]
-sys.modules["tedos"] = package
+sys.modules["backend"] = package
 
 # Now import the module normally under the package
-data_models = importlib.import_module("tedos.models.data_models")
+data_models = importlib.import_module("backend.models.data_models")
 AppState = data_models.AppState
 
 

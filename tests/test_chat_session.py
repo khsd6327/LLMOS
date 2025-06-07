@@ -5,17 +5,17 @@ from datetime import datetime
 import sys
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1] / "src"
-DM_PATH = ROOT / "tedos" / "models" / "data_models.py"
+ROOT = Path(__file__).resolve().parents[1]
+DM_PATH = ROOT / "backend" / "models" / "data_models.py"
 
-sys.modules.setdefault("tedos", types.ModuleType("tedos"))
-sys.modules["tedos"].__path__ = [str(ROOT / "tedos")]
-sys.modules.setdefault("tedos.models", types.ModuleType("tedos.models"))
-sys.modules["tedos.models"].__path__ = [str(ROOT / "tedos" / "models")]
+sys.modules.setdefault("backend", types.ModuleType("backend"))
+sys.modules["backend"].__path__ = [str(ROOT / "backend")]
+sys.modules.setdefault("backend.models", types.ModuleType("backend.models"))
+sys.modules["backend.models"].__path__ = [str(ROOT / "backend" / "models")]
 
-spec = importlib.util.spec_from_file_location("tedos.models.data_models", DM_PATH)
+spec = importlib.util.spec_from_file_location("backend.models.data_models", DM_PATH)
 data_models = importlib.util.module_from_spec(spec)
-sys.modules["tedos.models.data_models"] = data_models
+sys.modules["backend.models.data_models"] = data_models
 spec.loader.exec_module(data_models)
 ChatSession = data_models.ChatSession
 
