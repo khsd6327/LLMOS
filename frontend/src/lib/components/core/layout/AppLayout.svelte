@@ -1,5 +1,12 @@
 <!-- ted-os-project/frontend/src/lib/components/core/layout/AppLayout.svelte -->
 <script lang="ts">
+  import SettingsModal from "../../features/settings/SettingsModal.svelte";
+  import { settingsModalActions } from "../../../stores/settings/index.js";
+
+  // 설정 모달 열기 함수
+  function openSettings() {
+    settingsModalActions.open();
+  }
   // 사이드바 표시 여부와 크기
   let showSidebar = true;
   let sidebarWidth = 320; // 초기 너비 (w-80 = 320px)
@@ -10,21 +17,20 @@
   }
 
   // 사이드바 크기 조절
+  import { browser } from "$app/environment";
+
   function handleMouseDown(event: MouseEvent) {
+    if (!browser) return;
+
     isResizing = true;
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
     event.preventDefault();
   }
 
-  function handleMouseMove(event: MouseEvent) {
-    if (!isResizing) return;
-
-    const newWidth = Math.max(280, Math.min(500, event.clientX));
-    sidebarWidth = newWidth;
-  }
-
   function handleMouseUp() {
+    if (!browser) return;
+
     isResizing = false;
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
@@ -110,6 +116,7 @@
         <button
           class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           title="설정"
+          on:click={openSettings}
         >
           <svg
             width="20"
@@ -132,6 +139,8 @@
     </div>
   </div>
 </div>
+<!-- 설정 모달 -->
+<SettingsModal />
 
 <style>
   /* 크기 조절 중일 때 커서 변경 */
