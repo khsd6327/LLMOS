@@ -33,9 +33,9 @@ streamlit_stub.session_state = DummyState()
 sys.modules.setdefault("streamlit", streamlit_stub)
 
 from backend.main import handle_chat_message, ChatMessageRequest
-from src.tedos.managers.model_management.response_manager import ResponseManager
-from src.tedos.models.data_models import ChatSession, ModelConfig
-from src.tedos.models.enums import ModelProvider
+from backend.managers.model_management.response_manager import ResponseManager
+from backend.models.data_models import ChatSession, ModelConfig
+from backend.models.enums import ModelProvider
 
 
 class FakeSettings:

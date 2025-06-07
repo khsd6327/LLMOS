@@ -1,4 +1,4 @@
-# ted-os-project/src/tedos/managers/favorite_manager.py
+# ted-os-project/backend/managers/favorite_manager.py
 import json
 import logging
 import os
@@ -9,9 +9,9 @@ from typing import Dict, List, Optional, Any
 logger = logging.getLogger(__name__)
 
 # Import dependencies using absolute paths
-from src.tedos.models.data_models import FavoriteMessage
-from src.tedos.models.enums import ModelProvider
-from src.tedos.utils.helpers import ensure_directory_exists
+from backend.models.data_models import FavoriteMessage
+from backend.models.enums import ModelProvider
+from backend.utils.helpers import ensure_directory_exists
 
 
 FAVORITES_FILE_NAME = "favorites_data.json" # 즐겨찾기 데이터 저장 파일명

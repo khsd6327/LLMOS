@@ -6,15 +6,15 @@ from datetime import datetime
 
 # Helper loader to import modules without executing heavy package __init__
 TEST_ROOT = Path(__file__).resolve().parents[1]
-TEDOS_PATH = TEST_ROOT / "src" / "tedos"
+TEDOS_PATH = TEST_ROOT / "backend"
 
-if "tedos" not in sys.modules:
-    pkg = types.ModuleType("tedos")
+if "backend" not in sys.modules:
+    pkg = types.ModuleType("backend")
     pkg.__path__ = [str(TEDOS_PATH)]
-    sys.modules["tedos"] = pkg
+    sys.modules["backend"] = pkg
 
-helpers = importlib.import_module("tedos.utils.helpers")
-models = importlib.import_module("tedos.models.data_models")
+helpers = importlib.import_module("backend.utils.helpers")
+models = importlib.import_module("backend.models.data_models")
 
 
 def test_sanitize_filename_invalid_chars():
