@@ -101,7 +101,9 @@ class ResponseManager:
                 actual_provider_name = provider_display_name or self.settings.get(
                     "ui.selected_provider"
                 )
-                actual_model_key = model_id_key or self.settings.get("defaults.model")
+                actual_model_key = model_id_key or self.settings.get_default_model_for_provider(
+                    actual_provider_name
+                )
                 response_text, usage = self.generate(
                     messages, actual_provider_name, actual_model_key, **kwargs
                 )
