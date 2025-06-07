@@ -248,7 +248,9 @@ async def handle_chat_message(
         context: AppContext = Depends(get_app_context)
 ):
     """지정된 세션에 채팅 메시지를 보내고 AI의 응답을 스트리밍으로 받습니다."""
-    print(">>>>>>>>>>>>> CHAT HANDLER EXECUTING! FILE IS SAVED. <<<<<<<<<<<<<")
+    logger.info(
+        ">>>>>>>>>>>>> CHAT HANDLER EXECUTING! FILE IS SAVED. <<<<<<<<<<<<<"
+    )
 
     session = context.chat_manager.get_session(session_id)
     if not session:
@@ -301,7 +303,7 @@ async def handle_chat_message(
             yield "data: [DONE]\n\n"
 
         except Exception as e:
-            print(f"Error during streaming: {e}")
+            logger.error(f"Error during streaming: {e}")
             yield f"data: 오류가 발생했습니다: {str(e)}\n\n"
             yield "data: [DONE]\n\n"
 
