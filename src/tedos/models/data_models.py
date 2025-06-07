@@ -70,15 +70,10 @@ class ChatSession:
 
     def to_dict(self) -> dict:
         """딕셔너리로 변환"""
-        return {
-            "id": self.id,
-            "title": self.title,
-            "messages": self.messages,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "metadata": self.metadata,
-            "is_pinned": self.is_pinned,
-        }
+        data = asdict(self)
+        data["created_at"] = self.created_at.isoformat()
+        data["updated_at"] = self.updated_at.isoformat()
+        return data
 
     @classmethod
     def from_dict(cls, data: dict) -> "ChatSession":
