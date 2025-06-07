@@ -1,1 +1,5 @@
-# ted-os-project/backend/__init__.py
+"""Backend package for Ted OS."""
+
+from .main import app
+
+__all__ = ["app"]
