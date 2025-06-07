@@ -264,7 +264,7 @@ async def handle_chat_message(
     context.chat_manager.update_session(session)
 
     provider_name = request.model_provider or context.settings.get("ui.selected_provider")
-    model_id = request.model_name or context.settings.get("defaults.model")
+    model_id = request.model_name or context.settings.get_default_model_for_provider(provider_name)
 
     if not provider_name or not model_id:
         raise HTTPException(status_code=400, detail="Model provider or name not configured")
