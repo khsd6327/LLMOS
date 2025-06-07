@@ -79,3 +79,14 @@ def test_spotify_track_serialization_roundtrip():
     data = track.to_dict()
     restored = models.SpotifyTrack.from_dict(data)
     assert restored == track
+
+
+def test_extract_urls_simple():
+    text = "Visit https://example.com for docs"
+    assert helpers.extract_urls(text) == ["https://example.com"]
+
+
+def test_extract_urls_multiple_and_punctuation():
+    text = "Links: https://a.com, http://b.org/path?x=1#y!"
+    urls = helpers.extract_urls(text)
+    assert urls == ["https://a.com,", "http://b.org/path?x=1#y!"]

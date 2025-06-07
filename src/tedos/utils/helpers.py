@@ -313,6 +313,7 @@ def extract_urls(text: str) -> List[str]:
     """텍스트에서 URL 추출"""
     url_pattern = r'https?://[^\s<>"{}|\\^`[\]]+'
 
+    return re.findall(url_pattern, text)
 
 def mask_sensitive_data(text: str, patterns: Optional[List[str]] = None) -> str:
     """민감한 데이터 마스킹"""
