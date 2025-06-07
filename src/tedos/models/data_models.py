@@ -77,6 +77,7 @@ class ChatSession:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "metadata": self.metadata,
+            "is_pinned": self.is_pinned,
         }
 
     @classmethod
@@ -89,6 +90,7 @@ class ChatSession:
             created_at=datetime.fromisoformat(data["created_at"]),
             updated_at=datetime.fromisoformat(data["updated_at"]),
             metadata=data.get("metadata", {}),
+            is_pinned=data.get("is_pinned", False),
         )
 
 
@@ -104,13 +106,10 @@ class AppState:
     def to_dict(self) -> dict:
         """딕셔너리로 변환"""
         return {
-            "id": self.id,
-            "title": self.title,
-            "messages": self.messages,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "metadata": self.metadata,
-            "is_pinned": self.is_pinned,  # 고정 상태도 저장
+            "current_session_id": self.current_session_id,
+            "current_page": self.current_page,
+            "is_initialized": self.is_initialized,
+            "last_activity": self.last_activity.isoformat() if self.last_activity else None,
         }
 
     @classmethod
@@ -161,16 +160,19 @@ class SpotifyTrack:
         }
     
     @classmethod
-    def from_dict(cls, data: dict) -> "ChatSession":
-        """딕셔너리에서 객체 생성"""
+    def from_dict(cls, data: dict) -> "SpotifyTrack":
+        """딕셔너리에서 SpotifyTrack 객체 생성"""
         return cls(
             id=data["id"],
-            title=data["title"],
-            messages=data.get("messages", []),
-            created_at=datetime.fromisoformat(data["created_at"]),
-            updated_at=datetime.fromisoformat(data["updated_at"]),
-            metadata=data.get("metadata", {}),
-            is_pinned=data.get("is_pinned", False),  # 기존 데이터 호환성을 위해 기본값 False
+            name=data.get("name", ""),
+            artists=data.get("artists", ""),
+            duration_ms=data.get("duration_ms", 0),
+            album_name=data.get("album_name", ""),
+            release_date=data.get("release_date", ""),
+            popularity=data.get("popularity", 0),
+            added_at=data.get("added_at"),
+            raw_genres=data.get("raw_genres", []),
+            mapped_genre=data.get("mapped_genre", "기타"),
         )
 
 @dataclass
